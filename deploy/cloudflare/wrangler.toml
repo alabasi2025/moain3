@@ -1,0 +1,8 @@
+name = "hrms-moain3"
+main = "worker.js"
+compatibility_date = "2025-01-01"
+[assets]
+directory = "./public"
+binding = "ASSETS"
+[vars]
+API_ORIGIN = "https://5001-izoiemgz6j8c8qr1g43qk-3c7ff1b5.sandbox.novita.ai"
