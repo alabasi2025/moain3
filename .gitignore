@@ -2,3 +2,7 @@
 __pycache__/
 .env
 
+bin/
+obj/
+*.user
+TestResults/

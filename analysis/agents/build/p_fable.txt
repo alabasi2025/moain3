@@ -1,0 +1,40 @@
+المهمة: محرك الرواتب وقواعد قانون العمل اليمني 5/1995 كدوال نقية في Hrms.Domain + اختبارات xUnit.
+الملفات: src/Hrms.Domain/Payroll/PayrollModels.cs ، src/Hrms.Domain/Payroll/PayrollCalculator.cs ، src/Hrms.Domain/Labor/YemenLaborRules.cs ، tests/Hrms.Tests/PayrollCalculatorTests.cs ، tests/Hrms.Tests/YemenLaborRulesTests.cs
+namespaces: Hrms.Domain.Payroll ، Hrms.Domain.Labor ، Hrms.Tests. استخدم decimal للمال وقرّب لمنزلتين MidpointRounding.AwayFromZero.
+
+العقد (حرفياً):
+namespace Hrms.Domain.Payroll:
+public enum ItemType { Earning, Deduction }
+public enum CalcMethod { Fixed, PctBasic, PctGross }
+public sealed record SalaryItem(string Code, string NameAr, ItemType Type, CalcMethod Method, decimal Amount, decimal? Percentage, bool SubjectToInsurance, bool IsBasic);
+public sealed record AttendanceTotals(decimal AbsentDays, int AbsentMinutesPartial, int LateMinutes, int EarlyLeaveMinutes, int OvertimeNormalMinutes, int OvertimeSpecialMinutes, decimal UnpaidLeaveDays);
+public sealed record PayrollSettings(int MonthDays = 30, decimal OvertimeRateNormal = 1.5m, decimal OvertimeRateSpecial = 2.0m, decimal InsuranceEmployeePct = 6m, decimal InsuranceEmployerPct = 9m, bool DeductInsurance = true);
+public sealed record PayrollInput(long EmployeeId, decimal DailyHours, IReadOnlyList<SalaryItem> FixedItems, IReadOnlyList<SalaryItem> VariableItems, AttendanceTotals Attendance, decimal AdvanceInstallment, decimal CustodyDeduction, PayrollSettings Settings);
+public sealed record PayrollLineItem(string Code, string NameAr, ItemType Type, decimal Amount);
+public sealed record PayrollResult(long EmployeeId, decimal BasicSalary, decimal DayRate, decimal HourRate, decimal InsurableWage, decimal TotalEarnings, decimal TotalDeductions, decimal NetPay, decimal EmployerInsurance, IReadOnlyList<PayrollLineItem> Items);
+public static class PayrollCalculator { public static PayrollResult Calculate(PayrollInput input); }
+
+القواعد:
+- Basic = مجموع بنود IsBasic (Fixed). خطأ ArgumentException إن لم يوجد بند أساسي أو DailyHours<=0.
+- البنود الثابتة والمتغيرة: Fixed ⇒ Amount ؛ PctBasic ⇒ Basic*Percentage/100 ؛ PctGross ⇒ يُحسب بعد مجموع المستحقات Fixed/PctBasic: GrossBase*Percentage/100.
+- DayRate = Basic/MonthDays ؛ HourRate = DayRate/DailyHours (بلا تقريب وسيط؛ قرّب عند إخراج المبالغ فقط).
+- بنود نظامية تُضاف تلقائياً إن >0 بالأكواد: OVERTIME (مستحق) = (OTn/60*HourRate*RateNormal)+(OTs/60*HourRate*RateSpecial) [م56 من الأجر الأساسي] ؛ ABSENCE = AbsentDays*DayRate + AbsentMinutesPartial/60*HourRate ؛ LATE = (Late+Early)/60*HourRate ؛ UNPAID_LEAVE = UnpaidLeaveDays*DayRate ؛ ADVANCE ؛ CUSTODY = min(CustodyDeduction, 25% من Basic) [م64] ؛ INSURANCE = InsurableWage*EmployeePct/100 إن DeductInsurance.
+- InsurableWage = مجموع المستحقات الثابتة SubjectToInsurance=true (بعد الحساب). EmployerInsurance = InsurableWage*EmployerPct/100 (لا يدخل الصافي).
+- NetPay = TotalEarnings − TotalDeductions (يجوز سالباً؟ لا: إن سالب ارمِ InvalidOperationException برسالة عربية).
+
+namespace Hrms.Domain.Labor — public static class YemenLaborRules:
+- public static decimal AnnualLeaveAccrued(int fullMonthsOfService) => 2.5*months (م79) 
+- public static decimal MaxCarryOver(decimal entitlement) => entitlement/2 (م79/4)
+- public static IReadOnlyList<(int Days, decimal PayPct)> SickLeavePay(int sickDayIndexStart, int days): لكل يوم بترتيبه التراكمي في السنة: 1-60 ⇒100، 61-120 ⇒85، 121-180⇒75، 181-240⇒50، بعدها 0 (بدون أجر م80/2). أرجع شرائح مجمعة متتالية.
+- public static decimal SickLeavePayAmount(decimal dayRate, int priorSickDaysThisYear, int days)
+- public static bool HajjEligible(DateOnly hireDate, DateOnly onDate, bool usedBefore) => سنوات خدمة كاملة>=4 && !usedBefore (م84)
+- public static int MaternityDays(bool difficultOrTwins) => 60 أو 80 (م45)
+- public static int NoticeDays(string payFrequency) monthly=30, half_monthly=15, else 7 (م38)
+- public static decimal EndOfServiceGratuityUninsured(decimal lastMonthlyWage, DateOnly hire, DateOnly end) = lastMonthlyWage * (days/365 بدقة 4 منازل) ، م120/2
+- public static decimal MaxDisciplinaryDeduction(decimal basic) = 20% (م93/3)
+- public static bool IsDisciplineWithinDeadline(DateOnly discovered, DateOnly action) => (action-discovered)<=15 يوماً (م94/3)
+- public static int MaxDailyMinutes(bool ramadan, bool juvenile, bool pregnantOrNursing): juvenile⇒420، pregnant⇒300، ramadan⇒360، else 480 (أقل قيمة منطبقة) (م71،43،48)
+- public static bool OvertimeAllowed(bool juvenile, bool pregnantFromSixthMonthOrPostnatal) (م44،48)
+- public static bool ProbationValid(int months) => months<=6 (م28)
+
+الاختبارات الإلزامية: المثال المرجعي: Basic 300000 (بند BASIC IsBasic SubjectToInsurance)، DailyHours 8، AbsentDays 1، Late 60، OTn 120، Advance 20000 ⇒ DayRate 10000، HourRate 1250، OVERTIME 3750، Earnings 303750، ABSENCE 10000، LATE 1250، INSURANCE 18000، ADVANCE 20000، Deductions 49250، Net 254500، EmployerInsurance 27000. واختبر: بدل سكن PctBasic 20% ⇒ 60000 وغير خاضع للتأمين؛ CUSTODY سقف 25%؛ SickLeavePayAmount(10000,50,20)= 10*10000 + 10*8500 = 185000؛ Hajj 3.9 سنة=false و4 سنوات=true؛ نهاية خدمة 200000 لسنتين = 400000؛ لا بند أساسي ⇒ ArgumentException؛ صافٍ سالب ⇒ InvalidOperationException.
