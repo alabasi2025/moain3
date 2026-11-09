@@ -1,0 +1,18 @@
+المهمة: واجهة ويب عربية RTL كاملة في ملف واحد بدون أي مكتبات خارجية (HTML+CSS+JavaScript vanilla)، تُخدم ثابتاً من ASP.NET.
+أخرج ملفاً واحداً بالمسار: src/Hrms.Api/wwwroot/index.html
+التصميم: حديث، خط system-ui، شريط جانبي، ألوان هادئة (#0f766e أساسي)، جداول نظيفة، رسائل خطأ واضحة بالعربية من ProblemDetails (title/detail).
+الـAPI (أساس /api/v1، كل الاستجابات {data, meta?}، الأخطاء RFC7807):
+- POST /auth/login {companyCode, username, password} ⇒ data {accessToken, refreshToken, expiresIn, user{id,username,displayName,isAdmin,companyId,permissions[]}}
+- POST /auth/refresh {refreshToken} ⇒ نفس الشكل. عند 401 جرّب refresh مرة واحدة ثم أعد الطلب، وإلا ارجع لشاشة الدخول. خزّن الرموز في sessionStorage.
+- GET /auth/me
+- GET /org-nodes/tree ⇒ data: [{id, code, nameAr, nameEn, nodeType, parentId, children[]}] (قد تكون أسماء الحقول بحالة camelCase؛ اعرض nameAr). POST /org-nodes {parentId, code?, nameAr, nameEn, nodeType} حيث nodeType ∈ root,region,general_admin,company,branch,department,section. DELETE /org-nodes/{id}.
+- GET /defs/{kind}?search=&page=&pageSize= حيث kind ∈ job-grades, jobs, cost-centers, employee-groups, projects, banks, nationalities, work-natures (أسماء عربية: الدرجات الوظيفية، الوظائف، مراكز التكلفة، مجموعات الموظفين، المشاريع، البنوك، الجنسيات، طبيعة العمل) ⇒ data [{id, code, nameAr, nameEn, notes, isActive}]. POST/PUT/DELETE /defs/{kind}/{id} body {code?, nameAr, nameEn, notes, isActive}.
+- GET /lookups?lookupType=employee_status ⇒ data [{id, code, nameAr}]
+- GET /employees?search=&page=&pageSize= ⇒ data [{id, employeeNo, fingerprintNo, fullNameAr, orgNodeId, jobId, statusId, hireDate, workStartDate}]. POST /employees {firstNameAr, middleNameAr, lastNameAr, gender:'M'|'F', orgNodeId, hireDate, statusId, fingerprintNo?, mobile?}. POST /employees/{id}/start-work {startDate, notes}.
+- GET /shifts ⇒ data [...]; POST /shift-assignments/apply {employeeIds[], shiftId, effectiveFrom} ⇒ data {applied[], rejected[{employeeId, reason}]}
+- POST /punches/manual {employeeId, punchTime (ISO local بدون منطقة), direction:'in'|'out', reason}
+- POST /attendance/process {from:'YYYY-MM-DD', to:'YYYY-MM-DD'} ⇒ data {processedDays, employees, skippedManual}
+- GET /attendance/daily?employeeId=&from=&to= ⇒ data [{workDate, status, inTime, outTime, requiredMinutes, workMinutes, lateMin, earlyLeaveMin, absentMin, overtimeMin, excusedMin}]
+الشاشات: 1) دخول (رقم الشركة افتراضي C1، المستخدم، كلمة المرور) مثل الدليل. 2) الرئيسية: بطاقات (عدد الموظفين، عدد العقد). 3) الهيكل الإداري: شجرة قابلة للطي + نموذج إضافة عقدة تحت المحددة + حذف. 4) التعريفات: قائمة منسدلة بالأنواع الثمانية + جدول + بحث + إضافة/تعديل/حذف في نافذة. 5) الموظفون: جدول + بحث + إضافة + زر «مباشرة العمل». 6) الحضور: ربط موظفين محددين بفترة، بصمة يدوية، احتساب مدى، وجدول الحضور اليومي لموظف مع ألوان للحالات (present أخضر، absent أحمر، leave أزرق، holiday/weekend رمادي). اعرض الحالات بالعربية: حاضر، غائب، إجازة، عطلة، عمل في عطلة، راحة أسبوعية، مستأذن.
+أخفِ عناصر القائمة التي لا يملك المستخدم صلاحيتها (إلا isAdmin): defs.org_nodes.read، defs.jobs.read، employees.employees.read، attendance.daily.read.
+لا تستخدم innerHTML مع بيانات المستخدم دون تهريب (اكتب دالة esc). لا TODO.

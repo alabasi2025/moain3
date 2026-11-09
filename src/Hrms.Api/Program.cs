@@ -12,6 +12,8 @@ builder.Services.AddHealthChecks();
 
 var app = builder.Build();
 app.UseProblemExceptions();
+app.UseDefaultFiles();
+app.UseStaticFiles();
 app.UseAuthentication();
 app.UseAuthorization();
 app.MapControllers();
