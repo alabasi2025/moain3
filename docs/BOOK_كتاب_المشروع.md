@@ -32,8 +32,17 @@
 | الرابط | الحالة | السبب |
 |---|---|---|
 | رابط الساندبوكس المباشر `https://5001-izoiemgz6j8c8qr1g43qk-3c7ff1b5.sandbox.novita.ai` | ✅ يعمل في المتصفح الآن | يموت عند انتهاء الساندبوكس |
-| `https://hrms-moain3.water-juniper-2b8.workers.dev` (حساب Cloudflare مؤقت) | ❌ المتصفح يرى صفحة تحقق «Just a moment…» (403) | حساب `--temporary` يفرض تحدّي حماية على المتصفحات؛ يعمل مع curl فقط |
-| النشر المُدار عبر Genspark (`gsk hosted deploy`) | ⏳ ينتظر موافقة المالك | أداة النشر تتطلب موافقة صريحة |
+| **https://1a16c8af-b624-4e6f-aff8-6a14c2400dfd.vip.gensparksite.com** (Genspark Hosted على Cloudflare) | ✅ **يعمل في المتصفح** — الرابط الرسمي | الواجهة على Cloudflare؛ الـAPI يمر إلى الساندبوكس |
+| `https://hrms-moain3.water-juniper-2b8.workers.dev` (حساب Cloudflare مؤقت) | ❌ صفحة تحقق «Just a moment…» (403) للمتصفحات | لا تستخدمه |
+
+
+### ✅ النشر الذي يعمل (Genspark Hosted على Cloudflare) — https://1a16c8af-b624-4e6f-aff8-6a14c2400dfd.vip.gensparksite.com
+- يعمل في المتصفح (تحقق بمتصفح حقيقي: الصفحة تُحمَّل بلا أخطاء، والدخول `admin`/`1` و`user`/`1` ناجح عبره).
+- الإعداد: `wrangler.jsonc` في الجذر → `deploy/cloudflare/worker.js` يخدم الواجهة من `deploy/cloudflare/public/` ويمرّر `/api/*` و`/health` إلى `API_ORIGIN`.
+- **الدورة:** `git commit` ← `gsk hosted deploy` ← يعيد `pending_approval` ← المالك يوافق (أو `gsk hosted action_approve --id <id>` بعد تأكيده في المحادثة) ← `gsk hosted action_wait --id <id>` حتى `completed` ← `gsk hosted worker_get` للرابط. الرابط ثابت عبر إعادات النشر.
+- **شروط النجاح (من تجربة وكيل آخر):** جذر صغير ونظيف، **لا symlinks** (`Source tree contains a symlink`)، لا KV/Durable Objects/cron، D1 وR2 واحد كحد أقصى. عند الفشل: `gsk hosted action_status --id <id>` واقرأ `result.first_error_line`.
+- ❌ الرابط القديم `https://hrms-moain3.water-juniper-2b8.workers.dev` (حساب `--temporary`) يعرض صفحة تحقق Cloudflare للمتصفحات — لا تستخدمه.
+- ⚠️ الواجهة على Cloudflare، لكن `API_ORIGIN` ما زال يشير إلى خادم الساندبوكس المؤقت؛ عند موته يتوقف الدخول. للديمومة: استضف .NET + SQL Server على خادم دائم، غيّر `API_ORIGIN` في `wrangler.jsonc`، ثم أعد الدورة أعلاه.
 
 **حقيقة تقنية مهمة:** Cloudflare لا يشغّل .NET ولا SQL Server. أي رابط Cloudflare يعرض الواجهة ويمرّر `/api/*` إلى خادم الـAPI (`API_ORIGIN`). لكي يعمل دائماً يجب استضافة الـAPI والقاعدة على خادم دائم (VPS / Azure App Service + Azure SQL / Fly.io)، ثم تغيير `API_ORIGIN` في `wrangler.jsonc` و`deploy/cloudflare/wrangler.toml`.
 

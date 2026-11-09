@@ -87,6 +87,15 @@ fixes/                                              06 إصلاحات+قانون
 **مفتوح مع صاحب النظام:** «الوثيقة الرئيسية» (الأقسام 3-13) غير مستلمة؛ قواعد المحرك الحالية [مستنتجة] — راجع الأسئلة التسعة في `docs/00_التقرير_الشامل.md` §8.
 
 ## 8. النشر
+
+### ✅ النشر الذي يعمل (Genspark Hosted على Cloudflare) — https://1a16c8af-b624-4e6f-aff8-6a14c2400dfd.vip.gensparksite.com
+- يعمل في المتصفح (تحقق بمتصفح حقيقي: الصفحة تُحمَّل بلا أخطاء، والدخول `admin`/`1` و`user`/`1` ناجح عبره).
+- الإعداد: `wrangler.jsonc` في الجذر → `deploy/cloudflare/worker.js` يخدم الواجهة من `deploy/cloudflare/public/` ويمرّر `/api/*` و`/health` إلى `API_ORIGIN`.
+- **الدورة:** `git commit` ← `gsk hosted deploy` ← يعيد `pending_approval` ← المالك يوافق (أو `gsk hosted action_approve --id <id>` بعد تأكيده في المحادثة) ← `gsk hosted action_wait --id <id>` حتى `completed` ← `gsk hosted worker_get` للرابط. الرابط ثابت عبر إعادات النشر.
+- **شروط النجاح (من تجربة وكيل آخر):** جذر صغير ونظيف، **لا symlinks** (`Source tree contains a symlink`)، لا KV/Durable Objects/cron، D1 وR2 واحد كحد أقصى. عند الفشل: `gsk hosted action_status --id <id>` واقرأ `result.first_error_line`.
+- ❌ الرابط القديم `https://hrms-moain3.water-juniper-2b8.workers.dev` (حساب `--temporary`) يعرض صفحة تحقق Cloudflare للمتصفحات — لا تستخدمه.
+- ⚠️ الواجهة على Cloudflare، لكن `API_ORIGIN` ما زال يشير إلى خادم الساندبوكس المؤقت؛ عند موته يتوقف الدخول. للديمومة: استضف .NET + SQL Server على خادم دائم، غيّر `API_ORIGIN` في `wrangler.jsonc`، ثم أعد الدورة أعلاه.
+
 - **Cloudflare Pages/Workers لا يشغّل .NET ولا SQL Server.** الخيارات: (أ) استضافة API على VM/حاوية (Azure App Service، Fly.io، VPS) + Azure SQL/SQL Server، والواجهة الثابتة على Cloudflare Pages تشير إلى رابط API (يتطلب CORS)؛ (ب) نقل الخلفية إلى Workers + D1 (إعادة كتابة كاملة — غير موصى به).
 - **المنشور الآن (Cloudflare Worker):** https://hrms-moain3.water-juniper-2b8.workers.dev — الإعداد في `deploy/cloudflare/` (`worker.js` يخدم الواجهة ويمرّر `/api/*` و`/health` إلى `API_ORIGIN`).
 - ⚠️ **لا يفتح في المتصفح:** حساب `--temporary` يعرض صفحة تحقق Cloudflare (403). البديل الفوري: رابط الساندبوكس المباشر. النشر المُدار `gsk hosted deploy` (ملف `wrangler.jsonc` في الجذر) ينتظر موافقة المالك.
