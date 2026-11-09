@@ -88,4 +88,6 @@ fixes/                                              06 إصلاحات+قانون
 
 ## 8. النشر
 - **Cloudflare Pages/Workers لا يشغّل .NET ولا SQL Server.** الخيارات: (أ) استضافة API على VM/حاوية (Azure App Service، Fly.io، VPS) + Azure SQL/SQL Server، والواجهة الثابتة على Cloudflare Pages تشير إلى رابط API (يتطلب CORS)؛ (ب) نقل الخلفية إلى Workers + D1 (إعادة كتابة كاملة — غير موصى به).
-- معاينة الساندبوكس كانت: `https://5001-<sandbox-id>.sandbox.novita.ai` (مؤقتة، تموت مع الساندبوكس).
+- **المنشور الآن (Cloudflare Worker):** https://hrms-moain3.water-juniper-2b8.workers.dev — الإعداد في `deploy/cloudflare/` (`worker.js` يخدم الواجهة ويمرّر `/api/*` و`/health` إلى `API_ORIGIN`).
+- ⚠️ نُشر بـ `wrangler deploy --temporary` (حساب Cloudflare مؤقت — **ينتهي خلال أيام**)، و`API_ORIGIN` يشير إلى خادم الساندبوكس المؤقت. عند موت الساندبوكس تعمل الواجهة ويتوقف الدخول.
+- **لجعله دائماً:** (1) استضف API (.NET + SQL Server) على خادم دائم؛ (2) غيّر `API_ORIGIN` في `deploy/cloudflare/wrangler.toml`؛ (3) `cd deploy/cloudflare && wrangler login && wrangler deploy` على حساب Cloudflare الخاص بك (أو مهارة `cf-byok-deploy`). انسخ `src/Hrms.Api/wwwroot/*` إلى `deploy/cloudflare/public/` عند تحديث الواجهة.
