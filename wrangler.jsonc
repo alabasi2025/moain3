@@ -1,0 +1,7 @@
+{
+  "name": "hrms-moain3",
+  "main": "deploy/cloudflare/worker.js",
+  "compatibility_date": "2025-01-01",
+  "assets": { "directory": "./deploy/cloudflare/public", "binding": "ASSETS" },
+  "vars": { "API_ORIGIN": "https://5001-izoiemgz6j8c8qr1g43qk-3c7ff1b5.sandbox.novita.ai" }
+}

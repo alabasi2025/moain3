@@ -1,6 +1,6 @@
 # HANDOFF — للمتابعة في بيئة/وكيل جديد
 
-> اقرأ هذا الملف أولاً. آخر تحديث: 2026-11-09 08:45. الفرع الرئيسي `main` يحوي كل شيء (طلب الدمج #1 مدموج).
+> اقرأ هذا الملف أولاً. الكتاب الشامل: `docs/BOOK_كتاب_المشروع.md`. آخر تحديث: 2026-11-09 08:45. الفرع الرئيسي `main` يحوي كل شيء (طلب الدمج #1 مدموج).
 
 ## 1. ما هو المشروع
 إعادة بناء «نظام شؤون الموظفين» (أنظمة الجزيرة — دليل 27 صفحة في `source/`) على حزمة البناء `pack/` (SQL Server + OpenAPI + صلاحيات)، متوافق مع **قانون العمل اليمني 5/1995** وقانون التأمينات 26/1991.
@@ -89,5 +89,6 @@ fixes/                                              06 إصلاحات+قانون
 ## 8. النشر
 - **Cloudflare Pages/Workers لا يشغّل .NET ولا SQL Server.** الخيارات: (أ) استضافة API على VM/حاوية (Azure App Service، Fly.io، VPS) + Azure SQL/SQL Server، والواجهة الثابتة على Cloudflare Pages تشير إلى رابط API (يتطلب CORS)؛ (ب) نقل الخلفية إلى Workers + D1 (إعادة كتابة كاملة — غير موصى به).
 - **المنشور الآن (Cloudflare Worker):** https://hrms-moain3.water-juniper-2b8.workers.dev — الإعداد في `deploy/cloudflare/` (`worker.js` يخدم الواجهة ويمرّر `/api/*` و`/health` إلى `API_ORIGIN`).
+- ⚠️ **لا يفتح في المتصفح:** حساب `--temporary` يعرض صفحة تحقق Cloudflare (403). البديل الفوري: رابط الساندبوكس المباشر. النشر المُدار `gsk hosted deploy` (ملف `wrangler.jsonc` في الجذر) ينتظر موافقة المالك.
 - ⚠️ نُشر بـ `wrangler deploy --temporary` (حساب Cloudflare مؤقت — **ينتهي خلال أيام**)، و`API_ORIGIN` يشير إلى خادم الساندبوكس المؤقت. عند موت الساندبوكس تعمل الواجهة ويتوقف الدخول.
 - **لجعله دائماً:** (1) استضف API (.NET + SQL Server) على خادم دائم؛ (2) غيّر `API_ORIGIN` في `deploy/cloudflare/wrangler.toml`؛ (3) `cd deploy/cloudflare && wrangler login && wrangler deploy` على حساب Cloudflare الخاص بك (أو مهارة `cf-byok-deploy`). انسخ `src/Hrms.Api/wwwroot/*` إلى `deploy/cloudflare/public/` عند تحديث الواجهة.
