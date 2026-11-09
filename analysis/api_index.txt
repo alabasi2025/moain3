@@ -1,0 +1,319 @@
+POST /auth/login [-] Login
+POST /auth/refresh [-] Rotate refresh token
+POST /auth/logout [-] Revoke refresh token
+POST /auth/change-password [-] Change own password
+POST /auth/forgot-password [-] Start password reset
+GET /auth/me [-] Current user, permissions, data scope
+GET /auth/fiscal-years [-] Open fiscal years for the login screen
+GET /companies [admin.companies.read] List Companies
+POST /companies [admin.companies.create] Create Company
+GET /companies/{id} [admin.companies.read] Get Company
+PUT /companies/{id} [admin.companies.update] Update Company
+DELETE /companies/{id} [admin.companies.delete] Soft delete Company
+GET /fiscal-years [admin.fiscal_years.read] List FiscalYears
+POST /fiscal-years [admin.fiscal_years.create] Create FiscalYear
+GET /fiscal-years/{id} [admin.fiscal_years.read] Get FiscalYear
+PUT /fiscal-years/{id} [admin.fiscal_years.update] Update FiscalYear
+DELETE /fiscal-years/{id} [admin.fiscal_years.delete] Soft delete FiscalYear
+POST /fiscal-years/{id}/close [admin.fiscal_years.process] Close fiscal year (locks transactions)
+GET /users [admin.users.read] List Users
+POST /users [admin.users.create] Create User
+GET /users/{id} [admin.users.read] Get User
+PUT /users/{id} [admin.users.update] Update User
+DELETE /users/{id} [admin.users.delete] Soft delete User
+GET /user-groups [admin.user_groups.read] List UserGroups
+POST /user-groups [admin.user_groups.create] Create UserGroup
+GET /user-groups/{id} [admin.user_groups.read] Get UserGroup
+PUT /user-groups/{id} [admin.user_groups.update] Update UserGroup
+DELETE /user-groups/{id} [admin.user_groups.delete] Soft delete UserGroup
+GET /roles [admin.roles.read] List Roles
+POST /roles [admin.roles.create] Create Role
+GET /roles/{id} [admin.roles.read] Get Role
+PUT /roles/{id} [admin.roles.update] Update Role
+DELETE /roles/{id} [admin.roles.delete] Soft delete Role
+GET /settings [admin.settings.read] Get settings
+PUT /settings [admin.settings.update] Update settings
+GET /report-headers [admin.report_headers.read] List ReportHeaders
+GET /report-headers/{id} [admin.report_headers.read] Get ReportHeader
+PUT /report-headers/{id} [admin.report_headers.update] Update ReportHeader
+GET /backups [admin.backups.read] List backups
+POST /backups [admin.backups.create] Create backup
+POST /backups/{key}/restore [admin.backups.process] Restore backup
+GET /audit-logs [admin.audit_logs.read] Query audit log
+GET /calendar/convert [-] Gregorian <-> Hijri (Umm al-Qura + company adjustment)
+GET /org-nodes/tree [defs.org_nodes.read] Org structure as nested tree
+GET /org-nodes [defs.org_nodes.read] List OrgNodes
+POST /org-nodes [defs.org_nodes.create] Create OrgNode
+GET /org-nodes/{id} [defs.org_nodes.read] Get OrgNode
+PUT /org-nodes/{id} [defs.org_nodes.update] Update OrgNode
+DELETE /org-nodes/{id} [defs.org_nodes.delete] Soft delete OrgNode
+POST /org-nodes/{id}/move [defs.org_nodes.update] Move node (validates no cycles)
+GET /job-grades [defs.job_grades.read] List JobGrades
+POST /job-grades [defs.job_grades.create] Create JobGrade
+GET /job-grades/{id} [defs.job_grades.read] Get JobGrade
+PUT /job-grades/{id} [defs.job_grades.update] Update JobGrade
+DELETE /job-grades/{id} [defs.job_grades.delete] Soft delete JobGrade
+GET /jobs [defs.jobs.read] List Jobs
+POST /jobs [defs.jobs.create] Create Job
+GET /jobs/{id} [defs.jobs.read] Get Job
+PUT /jobs/{id} [defs.jobs.update] Update Job
+DELETE /jobs/{id} [defs.jobs.delete] Soft delete Job
+GET /cost-centers [defs.cost_centers.read] List CostCenters
+POST /cost-centers [defs.cost_centers.create] Create CostCenter
+GET /cost-centers/{id} [defs.cost_centers.read] Get CostCenter
+PUT /cost-centers/{id} [defs.cost_centers.update] Update CostCenter
+DELETE /cost-centers/{id} [defs.cost_centers.delete] Soft delete CostCenter
+GET /employee-groups [defs.employee_groups.read] List EmployeeGroups
+POST /employee-groups [defs.employee_groups.create] Create EmployeeGroup
+GET /employee-groups/{id} [defs.employee_groups.read] Get EmployeeGroup
+PUT /employee-groups/{id} [defs.employee_groups.update] Update EmployeeGroup
+DELETE /employee-groups/{id} [defs.employee_groups.delete] Soft delete EmployeeGroup
+GET /projects [defs.projects.read] List Projects
+POST /projects [defs.projects.create] Create Project
+GET /projects/{id} [defs.projects.read] Get Project
+PUT /projects/{id} [defs.projects.update] Update Project
+DELETE /projects/{id} [defs.projects.delete] Soft delete Project
+GET /banks [defs.banks.read] List Banks
+POST /banks [defs.banks.create] Create Bank
+GET /banks/{id} [defs.banks.read] Get Bank
+PUT /banks/{id} [defs.banks.update] Update Bank
+DELETE /banks/{id} [defs.banks.delete] Soft delete Bank
+GET /countries [defs.countries.read] List Countries
+POST /countries [defs.countries.create] Create Country
+GET /countries/{id} [defs.countries.read] Get Country
+PUT /countries/{id} [defs.countries.update] Update Country
+DELETE /countries/{id} [defs.countries.delete] Soft delete Country
+GET /insurance-companies [defs.insurance_companies.read] List InsuranceCompanies
+POST /insurance-companies [defs.insurance_companies.create] Create InsuranceCompany
+GET /insurance-companies/{id} [defs.insurance_companies.read] Get InsuranceCompany
+PUT /insurance-companies/{id} [defs.insurance_companies.update] Update InsuranceCompany
+DELETE /insurance-companies/{id} [defs.insurance_companies.delete] Soft delete InsuranceCompany
+GET /document-types [defs.document_types.read] List DocumentTypes
+POST /document-types [defs.document_types.create] Create DocumentType
+GET /document-types/{id} [defs.document_types.read] Get DocumentType
+PUT /document-types/{id} [defs.document_types.update] Update DocumentType
+DELETE /document-types/{id} [defs.document_types.delete] Soft delete DocumentType
+GET /sponsors [defs.sponsors.read] List Sponsors
+POST /sponsors [defs.sponsors.create] Create Sponsor
+GET /sponsors/{id} [defs.sponsors.read] Get Sponsor
+PUT /sponsors/{id} [defs.sponsors.update] Update Sponsor
+DELETE /sponsors/{id} [defs.sponsors.delete] Soft delete Sponsor
+GET /nationalities [defs.nationalities.read] List Nationalities
+POST /nationalities [defs.nationalities.create] Create Nationality
+GET /nationalities/{id} [defs.nationalities.read] Get Nationality
+PUT /nationalities/{id} [defs.nationalities.update] Update Nationality
+DELETE /nationalities/{id} [defs.nationalities.delete] Soft delete Nationality
+GET /work-natures [defs.work_natures.read] List WorkNatures
+POST /work-natures [defs.work_natures.create] Create WorkNature
+GET /work-natures/{id} [defs.work_natures.read] Get WorkNature
+PUT /work-natures/{id} [defs.work_natures.update] Update WorkNature
+DELETE /work-natures/{id} [defs.work_natures.delete] Soft delete WorkNature
+GET /lookups [defs.lookups.read] List Lookups
+POST /lookups [defs.lookups.create] Create Lookup
+GET /lookups/{id} [defs.lookups.read] Get Lookup
+PUT /lookups/{id} [defs.lookups.update] Update Lookup
+DELETE /lookups/{id} [defs.lookups.delete] Soft delete Lookup
+GET /geo-locations [defs.geo_locations.read] List GeoLocations
+POST /geo-locations [defs.geo_locations.create] Create GeoLocation
+GET /geo-locations/{id} [defs.geo_locations.read] Get GeoLocation
+PUT /geo-locations/{id} [defs.geo_locations.update] Update GeoLocation
+DELETE /geo-locations/{id} [defs.geo_locations.delete] Soft delete GeoLocation
+GET /countries/{id}/cities [defs.countries.read] List Cities
+POST /countries/{id}/cities [defs.countries.create] Create City
+GET /countries/{id}/cities/{childId} [defs.countries.read] Get City
+PUT /countries/{id}/cities/{childId} [defs.countries.update] Update City
+DELETE /countries/{id}/cities/{childId} [defs.countries.delete] Soft delete City
+GET /employees [employees.employees.read] List Employees
+POST /employees [employees.employees.create] Create Employee
+GET /employees/{id} [employees.employees.read] Get Employee
+PUT /employees/{id} [employees.employees.update] Update Employee
+DELETE /employees/{id} [employees.employees.delete] Soft delete Employee
+POST /employees/query [employees.employees.read] Advanced query with selectable columns
+POST /employees/{id}/start-work [employees.employees.process] Confirm work start: creates leave balances, enables shift linking
+GET /employees/{id}/history [employees.history.read] Employee change history
+PUT /employees/{id}/portal-account [employees.portal_account.update] Create/update portal and mobile access
+PUT /employees/{id}/photo [employees.employees.update] Upload photo
+GET /employees/{id}/salary-items [employees.financial.read] List EmployeeSalaryItems
+POST /employees/{id}/salary-items [employees.financial.create] Create EmployeeSalaryItem
+GET /employees/{id}/salary-items/{childId} [employees.financial.read] Get EmployeeSalaryItem
+PUT /employees/{id}/salary-items/{childId} [employees.financial.update] Update EmployeeSalaryItem
+DELETE /employees/{id}/salary-items/{childId} [employees.financial.delete] Soft delete EmployeeSalaryItem
+GET /employees/{id}/documents [employees.documents.read] List EmployeeDocuments
+POST /employees/{id}/documents [employees.documents.create] Create EmployeeDocument
+GET /employees/{id}/documents/{childId} [employees.documents.read] Get EmployeeDocument
+PUT /employees/{id}/documents/{childId} [employees.documents.update] Update EmployeeDocument
+DELETE /employees/{id}/documents/{childId} [employees.documents.delete] Soft delete EmployeeDocument
+GET /employees/{id}/archive [employees.archive.read] List EmployeeArchive
+POST /employees/{id}/archive [employees.archive.create] Create EmployeeArchive
+GET /employees/{id}/archive/{childId} [employees.archive.read] Get EmployeeArchive
+PUT /employees/{id}/archive/{childId} [employees.archive.update] Update EmployeeArchive
+DELETE /employees/{id}/archive/{childId} [employees.archive.delete] Soft delete EmployeeArchive
+GET /employees/{id}/companions [employees.companions.read] List EmployeeCompanions
+POST /employees/{id}/companions [employees.companions.create] Create EmployeeCompanion
+GET /employees/{id}/companions/{childId} [employees.companions.read] Get EmployeeCompanion
+PUT /employees/{id}/companions/{childId} [employees.companions.update] Update EmployeeCompanion
+DELETE /employees/{id}/companions/{childId} [employees.companions.delete] Soft delete EmployeeCompanion
+GET /employees/{id}/qualifications [employees.qualifications.read] List EmployeeQualifications
+POST /employees/{id}/qualifications [employees.qualifications.create] Create EmployeeQualification
+GET /employees/{id}/qualifications/{childId} [employees.qualifications.read] Get EmployeeQualification
+PUT /employees/{id}/qualifications/{childId} [employees.qualifications.update] Update EmployeeQualification
+DELETE /employees/{id}/qualifications/{childId} [employees.qualifications.delete] Soft delete EmployeeQualification
+GET /employees/{id}/experiences [employees.experiences.read] List EmployeeExperiences
+POST /employees/{id}/experiences [employees.experiences.create] Create EmployeeExperience
+GET /employees/{id}/experiences/{childId} [employees.experiences.read] Get EmployeeExperience
+PUT /employees/{id}/experiences/{childId} [employees.experiences.update] Update EmployeeExperience
+DELETE /employees/{id}/experiences/{childId} [employees.experiences.delete] Soft delete EmployeeExperience
+GET /shifts [attendance.shifts.read] List Shifts
+POST /shifts [attendance.shifts.create] Create Shift
+GET /shifts/{id} [attendance.shifts.read] Get Shift
+PUT /shifts/{id} [attendance.shifts.update] Update Shift
+DELETE /shifts/{id} [attendance.shifts.delete] Soft delete Shift
+POST /shifts/simulate [attendance.shifts.read] Run attendance engine on hypothetical punches
+POST /shift-assignments/preview [attendance.shift_assignments.read] List employees matching filters
+POST /shift-assignments/apply [attendance.shift_assignments.create] Bulk link employees to shifts
+GET /shift-assignments [attendance.shift_assignments.read] List EmployeeShifts
+GET /shift-assignments/{id} [attendance.shift_assignments.read] Get EmployeeShift
+DELETE /shift-assignments/{id} [attendance.shift_assignments.delete] Soft delete EmployeeShift
+GET /biometric-devices [attendance.devices.read] List BiometricDevices
+POST /biometric-devices [attendance.devices.create] Create BiometricDevice
+GET /biometric-devices/{id} [attendance.devices.read] Get BiometricDevice
+PUT /biometric-devices/{id} [attendance.devices.update] Update BiometricDevice
+DELETE /biometric-devices/{id} [attendance.devices.delete] Soft delete BiometricDevice
+POST /biometric-devices/{id}/test [attendance.devices.process] Test device connection
+POST /biometric-devices/{id}/pull [attendance.devices.process] Pull punches now
+GET /punches [attendance.punches.read] List PunchLogs
+GET /punches/{id} [attendance.punches.read] Get PunchLog
+POST /punches/batch [-] Agent/device push of punches (X-Device-Key)
+POST /punches/manual [attendance.punches.create] Add manual punch with reason
+POST /punches/import [attendance.punches.create] Import punches from CSV/XLSX
+PATCH /punches/{id}/void [attendance.punches.delete] Void a punch (never deleted)
+GET /holidays [attendance.holidays.read] List OfficialHolidays
+POST /holidays [attendance.holidays.create] Create OfficialHoliday
+GET /holidays/{id} [attendance.holidays.read] Get OfficialHoliday
+PUT /holidays/{id} [attendance.holidays.update] Update OfficialHoliday
+DELETE /holidays/{id} [attendance.holidays.delete] Soft delete OfficialHoliday
+GET /excuse-types [attendance.excuse_types.read] List ExcuseTypes
+POST /excuse-types [attendance.excuse_types.create] Create ExcuseType
+GET /excuse-types/{id} [attendance.excuse_types.read] Get ExcuseType
+PUT /excuse-types/{id} [attendance.excuse_types.update] Update ExcuseType
+DELETE /excuse-types/{id} [attendance.excuse_types.delete] Soft delete ExcuseType
+GET /excuses [attendance.excuses.read] List Excuses
+POST /excuses [attendance.excuses.create] Create Excuse
+GET /excuses/{id} [attendance.excuses.read] Get Excuse
+PUT /excuses/{id} [attendance.excuses.update] Update Excuse
+DELETE /excuses/{id} [attendance.excuses.delete] Soft delete Excuse
+GET /attendance/daily [attendance.daily.read] List DailyAttendance
+GET /attendance/daily/{id} [attendance.daily.read] Get DailyAttendance
+PATCH /attendance/daily/{id} [attendance.daily.update] Manual override with reason (blocked after month close)
+POST /attendance/process [attendance.daily.process] (Re)compute daily attendance for a range
+GET /attendance/monthly [attendance.monthly.read] List MonthlyAttendances
+POST /attendance/monthly [attendance.monthly.create] Create monthly summary
+GET /attendance/monthly/{id} [attendance.monthly.read] Get MonthlyAttendance
+POST /attendance/monthly/preview [attendance.monthly.read] Preview monthly summary
+POST /attendance/monthly/{id}/close [attendance.monthly.process] Close month: locks daily rows and feeds payroll
+POST /attendance/monthly/{id}/reopen [admin.fiscal_years.process] Reopen month (manager only, audited)
+POST /mobile/punch [me.punch.create] Punch from phone (idempotent by clientId)
+GET /mobile/today [me.attendance.read] Today's shift and punches
+GET /mobile/config [-] Locations, rules, min app version
+POST /devices/register [-] Bind phone and register push token
+GET /leave-types [leaves.leave_types.read] List LeaveTypes
+POST /leave-types [leaves.leave_types.create] Create LeaveType
+GET /leave-types/{id} [leaves.leave_types.read] Get LeaveType
+PUT /leave-types/{id} [leaves.leave_types.update] Update LeaveType
+DELETE /leave-types/{id} [leaves.leave_types.delete] Soft delete LeaveType
+GET /leave-balances [leaves.balances.read] List LeaveBalances
+GET /leave-balances/{id} [leaves.balances.read] Get LeaveBalance
+POST /leave-balances/opening [leaves.balances.create] Enter opening balances
+POST /leave-balances/approve [leaves.balances.approve] Lock opening balances
+GET /leaves [leaves.leaves.read] List Leaves
+POST /leaves [leaves.leaves.create] Create Leave
+GET /leaves/{id} [leaves.leaves.read] Get Leave
+PUT /leaves/{id} [leaves.leaves.update] Update Leave
+DELETE /leaves/{id} [leaves.leaves.delete] Soft delete Leave
+POST /leaves/{id}/cancel [leaves.leaves.update] Cancel leave and restore balance
+POST /leaves/{id}/recall [leaves.leaves.update] Early return from leave
+GET /requests [requests.requests.read] List Requests
+POST /requests [requests.requests.create] Create Request
+GET /requests/{id} [requests.requests.read] Get Request
+GET /requests/inbox [requests.requests.approve] Requests awaiting my approval
+POST /requests/{id}/approve [requests.requests.approve] Approve current step
+POST /requests/{id}/reject [requests.requests.approve] Reject (reason required)
+POST /requests/{id}/cancel [requests.requests.create] Cancel own request
+GET /requests/{id}/comments [requests.requests.read] Comments
+POST /requests/{id}/comments [requests.requests.create] Add comment
+GET /approval-flows [requests.approval_flows.read] List ApprovalFlows
+POST /approval-flows [requests.approval_flows.create] Create ApprovalFlow
+GET /approval-flows/{id} [requests.approval_flows.read] Get ApprovalFlow
+PUT /approval-flows/{id} [requests.approval_flows.update] Update ApprovalFlow
+DELETE /approval-flows/{id} [requests.approval_flows.delete] Soft delete ApprovalFlow
+GET /delegations [requests.delegations.read] List Delegations
+POST /delegations [requests.delegations.create] Create Delegation
+GET /delegations/{id} [requests.delegations.read] Get Delegation
+PUT /delegations/{id} [requests.delegations.update] Update Delegation
+DELETE /delegations/{id} [requests.delegations.delete] Soft delete Delegation
+GET /payroll-items [finance.payroll_items.read] List PayrollItems
+POST /payroll-items [finance.payroll_items.create] Create PayrollItem
+GET /payroll-items/{id} [finance.payroll_items.read] Get PayrollItem
+PUT /payroll-items/{id} [finance.payroll_items.update] Update PayrollItem
+DELETE /payroll-items/{id} [finance.payroll_items.delete] Soft delete PayrollItem
+GET /variable-items [finance.variable_items.read] List VariableItems
+POST /variable-items [finance.variable_items.create] Create VariableItem
+GET /variable-items/{id} [finance.variable_items.read] Get VariableItem
+PUT /variable-items/{id} [finance.variable_items.update] Update VariableItem
+DELETE /variable-items/{id} [finance.variable_items.delete] Soft delete VariableItem
+GET /advances [finance.advances.read] List Advances
+POST /advances [finance.advances.create] Create Advance
+GET /advances/{id} [finance.advances.read] Get Advance
+PUT /advances/{id} [finance.advances.update] Update Advance
+DELETE /advances/{id} [finance.advances.delete] Soft delete Advance
+POST /advances/{id}/repay [finance.advances.process] Cash repayment (reschedules installments)
+GET /custodies [finance.custodies.read] List Custodies
+POST /custodies [finance.custodies.create] Create Custody
+GET /custodies/{id} [finance.custodies.read] Get Custody
+PUT /custodies/{id} [finance.custodies.update] Update Custody
+DELETE /custodies/{id} [finance.custodies.delete] Soft delete Custody
+POST /custodies/{id}/return [finance.custodies.process] Clear custody
+GET /payroll-runs [finance.payroll_runs.read] List PayrollRuns
+POST /payroll-runs [finance.payroll_runs.create] Create PayrollRun
+GET /payroll-runs/{id} [finance.payroll_runs.read] Get PayrollRun
+DELETE /payroll-runs/{id} [finance.payroll_runs.delete] Soft delete PayrollRun
+GET /payroll-runs/{id}/lines [finance.payroll_runs.read] Employee lines of a run
+POST /payroll-runs/{id}/calculate [finance.payroll_runs.process] Calculate (draft only)
+POST /payroll-runs/{id}/approve [finance.payroll_runs.approve] Approve and lock; posts advance installments
+POST /payroll-runs/{id}/unapprove [finance.payroll_runs.approve] Reverse approval (reverses installments)
+POST /payroll-runs/{id}/pay [finance.payroll_runs.process] Mark paid
+GET /payroll-runs/{id}/payslips/{employeeId} [finance.payslips.read] Payslip PDF
+GET /social-insurance-runs [finance.social_insurance.read] List SocialInsuranceRuns
+POST /social-insurance-runs [finance.social_insurance.create] Create SocialInsuranceRun
+GET /social-insurance-runs/{id} [finance.social_insurance.read] Get SocialInsuranceRun
+PUT /social-insurance-runs/{id} [finance.social_insurance.update] Update SocialInsuranceRun
+DELETE /social-insurance-runs/{id} [finance.social_insurance.delete] Soft delete SocialInsuranceRun
+GET /end-of-service [finance.end_of_service.read] List EndOfServices
+POST /end-of-service [finance.end_of_service.create] Create EndOfService
+GET /end-of-service/{id} [finance.end_of_service.read] Get EndOfService
+PUT /end-of-service/{id} [finance.end_of_service.update] Update EndOfService
+DELETE /end-of-service/{id} [finance.end_of_service.delete] Soft delete EndOfService
+GET /reports/{key} [reports.reports.read] Run report; use ?format=xlsx|pdf|csv to export
+GET /report-views [reports.report_views.read] List ReportViews
+POST /report-views [reports.report_views.create] Create ReportView
+GET /report-views/{id} [reports.report_views.read] Get ReportView
+PUT /report-views/{id} [reports.report_views.update] Update ReportView
+DELETE /report-views/{id} [reports.report_views.delete] Soft delete ReportView
+GET /dashboard/alerts [dashboard.dashboard.read] Alert counters
+GET /dashboard/requests-summary [dashboard.dashboard.read] Pending requests by type
+GET /dashboard/charts [dashboard.dashboard.read] Chart datasets
+GET /tasks [tasks.tasks.read] List Tasks
+POST /tasks [tasks.tasks.create] Create Task
+GET /tasks/{id} [tasks.tasks.read] Get Task
+PUT /tasks/{id} [tasks.tasks.update] Update Task
+DELETE /tasks/{id} [tasks.tasks.delete] Soft delete Task
+GET /notifications [tasks.notifications.read] My notifications
+POST /notifications/{id}/read [tasks.notifications.update] Mark read
+GET /me/profile [me.profile.read] My profile
+GET /me/attendance [me.attendance.read] My daily attendance
+GET /me/payslips [me.payslips.read] My payslips
+GET /me/leaves [me.leaves.read] My leaves
+GET /me/balances [me.balances.read] My leave balances
+GET /me/requests [me.requests.read] My requests
+POST /me/requests [me.requests.create] Create request (leave, advance, excuse, punch_fix...)
+GET /me/documents [me.documents.read] My documents with expiry
