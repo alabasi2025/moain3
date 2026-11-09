@@ -1,0 +1,59 @@
+المهمة: محرك احتساب الحضور اليومي كدالة نقية في مشروع Hrms.Domain (namespace Hrms.Domain.Attendance) + اختبارات xUnit في Hrms.Tests (namespace Hrms.Tests).
+الملفات المطلوبة: src/Hrms.Domain/Attendance/AttendanceModels.cs ، src/Hrms.Domain/Attendance/AttendanceEngine.cs ، tests/Hrms.Tests/AttendanceEngineTests.cs
+
+العقد (حرفياً):
+public sealed record ShiftDef(TimeOnly Start, TimeOnly End, int WorkMinutes, int BreakMinutes, bool CrossesMidnight,
+  int BeforeInMin, int AfterInMin, int BeforeOutMin, int AfterOutMin,
+  bool LateGraceEnabled, int LateGraceMin, bool LateAfterGrace,
+  bool EarlyGraceEnabled, int EarlyGraceMin, bool EarlyBeforeGrace,
+  bool PresentIfNoOut, bool PresentIfNoIn, bool OvertimeEnabled, TimeOnly? OvertimeFrom, TimeOnly? OvertimeTo);
+public sealed record ExcuseWindow(TimeOnly From, TimeOnly To);
+public sealed record DayContext(DateOnly WorkDate, bool IsWorkDay, bool IsHoliday, bool OnApprovedLeave, bool IsHalfDayLeave, bool IsRamadan, IReadOnlyList<ExcuseWindow> Excuses);
+public sealed record AttendanceSettings(int RamadanMaxMinutes = 360, int MaxDailyTotalMinutes = 720, int DuplicateWindowSeconds = 60, decimal OvertimeRateNormal = 1.5m, decimal OvertimeRateRestHoliday = 2.0m);
+public sealed record DailyResult(string Status, DateTime? InTime, DateTime? OutTime, int RequiredMinutes, int WorkMinutes, int LateMin, int EarlyLeaveMin, int AbsentMin, int OvertimeMin, int ExcusedMin, decimal OvertimeRate);
+public static class AttendanceEngine { public static DailyResult Compute(ShiftDef shift, DayContext day, IReadOnlyList<DateTime> punches, AttendanceSettings? settings = null); }
+Status ∈ {"present","absent","leave","holiday","holiday_work","weekend","excused"} (مطابق CK_DailyAttendance_Status).
+
+القواعد (حتمية، بالترتيب):
+0) البصمات: رتّب تصاعدياً وادمج المكررة (الفرق < DuplicateWindowSeconds يُبقى الأول).
+   مرجع الوقت: StartDT = WorkDate+Start ؛ EndDT = WorkDate+End ، وإن CrossesMidnight أو End<=Start فـ EndDT += يوم.
+1) OnApprovedLeave ولا IsHalfDayLeave ⇒ Status=leave وكل الدقائق 0 و Required=0.
+2) IsHoliday: بلا بصمات ⇒ holiday (كل شيء 0). مع بصمتين فأكثر ⇒ holiday_work، Required=0، Work=0، OvertimeMin = (آخر بصمة − أول بصمة) بالدقائق ناقص Break، OvertimeRate=OvertimeRateRestHoliday.
+3) !IsWorkDay: بلا بصمات ⇒ weekend. مع بصمتين فأكثر ⇒ present، Required=0، OvertimeMin كما في 2، Rate=RestHoliday.
+4) يوم عمل: Required = WorkMinutes (إن IsRamadan: min(WorkMinutes, RamadanMaxMinutes)) ؛ إن IsHalfDayLeave فـ Required/=2 (قسمة صحيحة).
+   In = أبكر بصمة ضمن [StartDT−BeforeInMin, StartDT+AfterInMin]. Out = أحدث بصمة ضمن [EndDT−BeforeOutMin, EndDT+AfterOutMin] وأكبر من In.
+   لا بصمات مقبولة ⇒ absent، Absent=Required.
+   In فقط: PresentIfNoOut ⇒ present و Work=Required وباقي 0 ؛ وإلا absent و Absent=Required. Out فقط: بالمثل مع PresentIfNoIn.
+   كلاهما:
+     LateRaw = max(0, In−StartDT) ؛ EarlyRaw = max(0, EndDT−Out) (دقائق صحيحة بالتقريب للأسفل).
+     ExcusedLate = تقاطع نوافذ الاستئذان (مُسقطة على WorkDate، وإن To<=From فـ To في اليوم التالي) مع [StartDT, In] ؛ ExcusedEarly = تقاطعها مع [Out, EndDT].
+     LateNet = LateRaw−ExcusedLate ؛ EarlyNet = EarlyRaw−ExcusedEarly.
+     LateMin: إن LateGraceEnabled و LateNet<=LateGraceMin ⇒ 0 ؛ إن LateGraceEnabled و LateAfterGrace ⇒ LateNet−LateGraceMin ؛ وإلا LateNet.
+     EarlyLeaveMin: نفس المنطق بـ EarlyGraceEnabled/EarlyGraceMin/EarlyBeforeGrace.
+     ExcusedMin = ExcusedLate+ExcusedEarly.
+     Work = max(0, (min(Out,EndDT) − max(In,StartDT)) − BreakMinutes) ثم Work=min(Work, Required).
+     Absent = max(0, Required − Work − ExcusedMin − LateMin − EarlyLeaveMin).
+     Overtime: إن OvertimeEnabled و OvertimeFrom,OvertimeTo غير null: تقاطع [EndDT, Out] مع [WorkDate+OvertimeFrom, WorkDate+OvertimeTo] (To<=From ⇒ اليوم التالي) ؛ وإلا 0. ثم سقف: Work+Overtime <= MaxDailyTotalMinutes. Rate=OvertimeRateNormal.
+     Status = present ؛ إلا إذا ExcusedMin>0 و LateMin==0 و EarlyLeaveMin==0 و Absent==0 ⇒ excused.
+
+الاختبارات الإلزامية (Theory/Fact لكل صف). الفترة القياسية: 08:00-16:00، WorkMinutes=480، Break=0، BeforeIn=60، AfterIn=240، BeforeOut=240، AfterOut=240، LateGraceEnabled=true, LateGraceMin=10, LateAfterGrace=true، EarlyGraceEnabled=true, EarlyGraceMin=10, EarlyBeforeGrace=true، PresentIfNoOut=false, PresentIfNoIn=false، OvertimeEnabled=false. التاريخ 2026-11-09.
+| # | المدخل | Late | Early | Work | Absent | OT | Excused | Status |
+1 08:00/16:00 → 0,0,480,0,0,0 present
+2 08:09/16:00 → 0,0,471,9,0,0 present
+3 08:25/16:00 → 15,0,455,10,0,0 present
+4 08:00/15:30 → 0,20,450,10,0,0 present
+5 لا بصمات → 0,0,0,480,0,0 absent
+6 08:00 فقط → 0,0,0,480,0,0 absent
+7 08:00 فقط مع PresentIfNoOut=true → 0,0,480,0,0,0 present
+8 08:00، 08:00:30، 16:00 → 0,0,480,0,0,0 present
+9 IsHoliday بلا بصمات → holiday، كله 0
+10 IsHoliday 08:00/12:00 → holiday_work، OT=240، Rate=2.0
+11 IsWorkDay=false بلا بصمات → weekend
+12 OnApprovedLeave → leave
+13 استئذان 08:00-10:00، بصمات 10:00/16:00 → 0,0,360,0,0,120 excused
+14 OvertimeEnabled 16:00-20:00، بصمات 08:00/18:00 → 0,0,480,0,120,0 present، Rate 1.5
+15 فترة 22:00-06:00 CrossesMidnight، بصمات 2026-11-09 22:05 و 2026-11-10 06:00 → 0,0,475,5,0,0 present
+16 IsRamadan، 08:00/14:00 → Required=360، Work=360، Absent=0 present
+17 نصف يوم إجازة IsHalfDayLeave، 08:00/12:00 → Required=240، Work=240، Absent=0 (Early: EarlyRaw=240 لأن EndDT=16:00 — لذلك في هذه الحالة أعد Required=240 واحسب Early على أساس End مُزاح: EndDT_eff = StartDT + Required + Break) present، Early=0
+18 ثابت لكل حالات يوم العمل: Work+Late+Early+Absent+Excused == Required.
+ملاحظة للحالة 17: طبّق EndDT_eff في يوم العمل عندما IsHalfDayLeave أو IsRamadan (End الفعلي = StartDT + Required + BreakMinutes).

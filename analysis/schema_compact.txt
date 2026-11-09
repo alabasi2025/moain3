@@ -1,0 +1,381 @@
+-- ملاحظة: كل جدول (عدا ما يُذكر) يحوي أيضاً الأعمدة القياسية: Id bigint IDENTITY PK, CreatedAt, CreatedBy, UpdatedAt, UpdatedBy, IsDeleted bit=0, RowVersion rowversion.
+-- الرمز ! يعني NOT NULL، و= القيمة الافتراضية.
+Companies(Code:nvarchar(20)!, NameAr:nvarchar(200)!, NameEn:nvarchar(200), LogoAttachmentId:bigint, TimeZone:nvarchar(50)!='Asia/Riyadh', CurrencyCode:nvarchar(10)!='YER', DefaultLanguage:nvarchar(5)!='ar', HijriAdjustDays:int!=0, IsActive:bit!=1)
+FiscalYears(CompanyId:bigint!, FiscalYear:int!, StartDate:date!, EndDate:date!, IsClosed:bit!=0, IsCurrent:bit!=0)
+UserGroups(CompanyId:bigint!, Code:int!, NameAr:nvarchar(200)!, NameEn:nvarchar(200), Notes:nvarchar(1000), IsActive:bit!=1)
+Roles(CompanyId:bigint!, Code:int!, NameAr:nvarchar(200)!, NameEn:nvarchar(200), Notes:nvarchar(1000), IsActive:bit!=1, IsSystem:bit!=0)
+Users(CompanyId:bigint!, Username:nvarchar(100)!, PasswordHash:nvarchar(500)!, DisplayName:nvarchar(200)!, Email:nvarchar(200), Mobile:nvarchar(30), Language:nvarchar(5)!='ar', EmployeeId:bigint, UserGroupId:bigint, UserType:nvarchar(20)!='normal', IsAdmin:bit!=0, IsActive:bit!=1, FailedLogins:int!=0, LockedUntil:datetimeoffset(0), LastLoginAt:datetimeoffset(0), MustChangePassword:bit!=0, TwoFactorEnabled:bit!=0, TwoFactorSecret:nvarchar(200))
+Permissions(PermCode:nvarchar(150)!, Module:nvarchar(50)!, DescriptionAr:nvarchar(300), DescriptionEn:nvarchar(300))
+RolePermissions(CompanyId:bigint!, RoleId:bigint!, PermissionId:bigint!)
+UserRoles(CompanyId:bigint!, UserId:bigint!, RoleId:bigint!)
+UserGroupRoles(CompanyId:bigint!, UserGroupId:bigint!, RoleId:bigint!)
+UserDataScopes(CompanyId:bigint!, UserId:bigint!, OrgNodeId:bigint!, IncludeChildren:bit!=1)
+RefreshTokens(CompanyId:bigint!, UserId:bigint!, TokenHash:nvarchar(200)!, ExpiresAt:datetimeoffset(0)!, RevokedAt:datetimeoffset(0), ReplacedByTokenId:bigint, DeviceUid:nvarchar(100), IpAddress:nvarchar(60))
+UserDevices(CompanyId:bigint!, UserId:bigint!, DeviceUid:nvarchar(100)!, Platform:nvarchar(20), Model:nvarchar(100), PushToken:nvarchar(500), IsApproved:bit!=0, ApprovedBy:bigint, LastSeenAt:datetimeoffset(0))
+Settings(CompanyId:bigint!, SettingKey:nvarchar(100)!, SettingValue:nvarchar(max))
+AuditLogs(CompanyId:bigint!, UserId:bigint, EntityName:nvarchar(100)!, EntityId:nvarchar(50)!, ActionType:nvarchar(20)!, OldValues:nvarchar(max), NewValues:nvarchar(max), IpAddress:nvarchar(60), DeviceName:nvarchar(100), Reason:nvarchar(300), OccurredAt:datetimeoffset(0)!=SYSDATETIMEOFFSET())
+Notifications(CompanyId:bigint!, UserId:bigint!, Title:nvarchar(200)!, Body:nvarchar(1000), NotifType:nvarchar(50), LinkRoute:nvarchar(300), IsRead:bit!=0, ReadAt:datetimeoffset(0))
+Attachments(CompanyId:bigint!, OwnerType:nvarchar(50)!, OwnerId:bigint!, FileName:nvarchar(300)!, ContentType:nvarchar(100), SizeBytes:bigint, StoragePath:nvarchar(500)!, Checksum:nvarchar(100), Title:nvarchar(200))
+ReportHeaders(CompanyId:bigint!, ReportKey:nvarchar(100)!, TitleAr:nvarchar(300), TitleEn:nvarchar(300), HeaderHtml:nvarchar(max), FooterHtml:nvarchar(max), LogoAttachmentId:bigint)
+ReportViews(CompanyId:bigint!, UserId:bigint!, ReportKey:nvarchar(100)!, ViewName:nvarchar(200)!, LayoutJson:nvarchar(max)!, IsShared:bit!=0)
+OrgNodes(CompanyId:bigint!, Code:int!, NameAr:nvarchar(200)!, NameEn:nvarchar(200), Notes:nvarchar(1000), IsActive:bit!=1, ParentId:bigint, NodeType:nvarchar(20)!, ManagerEmployeeId:bigint, NodePath:nvarchar(500), NodeLevel:int!=0, SortOrder:int!=0)
+JobGrades(CompanyId:bigint!, Code:int!, NameAr:nvarchar(200)!, NameEn:nvarchar(200), Notes:nvarchar(1000), IsActive:bit!=1)
+Jobs(CompanyId:bigint!, Code:int!, NameAr:nvarchar(200)!, NameEn:nvarchar(200), Notes:nvarchar(1000), IsActive:bit!=1, JobGradeId:bigint)
+CostCenters(CompanyId:bigint!, Code:int!, NameAr:nvarchar(200)!, NameEn:nvarchar(200), Notes:nvarchar(1000), IsActive:bit!=1, AccountCode:nvarchar(50))
+EmployeeGroups(CompanyId:bigint!, Code:int!, NameAr:nvarchar(200)!, NameEn:nvarchar(200), Notes:nvarchar(1000), IsActive:bit!=1)
+Projects(CompanyId:bigint!, Code:int!, NameAr:nvarchar(200)!, NameEn:nvarchar(200), Notes:nvarchar(1000), IsActive:bit!=1)
+Banks(CompanyId:bigint!, Code:int!, NameAr:nvarchar(200)!, NameEn:nvarchar(200), Notes:nvarchar(1000), IsActive:bit!=1, SwiftCode:nvarchar(20))
+Countries(CompanyId:bigint!, Code:int!, NameAr:nvarchar(200)!, NameEn:nvarchar(200), Notes:nvarchar(1000), IsActive:bit!=1, IsoCode:nvarchar(3))
+Cities(CompanyId:bigint!, Code:int!, NameAr:nvarchar(200)!, NameEn:nvarchar(200), Notes:nvarchar(1000), IsActive:bit!=1, CountryId:bigint!)
+InsuranceCompanies(CompanyId:bigint!, Code:int!, NameAr:nvarchar(200)!, NameEn:nvarchar(200), Notes:nvarchar(1000), IsActive:bit!=1)
+DocumentTypes(CompanyId:bigint!, Code:int!, NameAr:nvarchar(200)!, NameEn:nvarchar(200), Notes:nvarchar(1000), IsActive:bit!=1, RequiresExpiry:bit!=1, AlertDaysBefore:int!=30, AppliesTo:nvarchar(20)!='employee')
+Sponsors(CompanyId:bigint!, Code:int!, NameAr:nvarchar(200)!, NameEn:nvarchar(200), Notes:nvarchar(1000), IsActive:bit!=1, Mobile:nvarchar(30))
+Nationalities(CompanyId:bigint!, Code:int!, NameAr:nvarchar(200)!, NameEn:nvarchar(200), Notes:nvarchar(1000), IsActive:bit!=1)
+WorkNatures(CompanyId:bigint!, Code:int!, NameAr:nvarchar(200)!, NameEn:nvarchar(200), Notes:nvarchar(1000), IsActive:bit!=1)
+Lookups(CompanyId:bigint!, Code:int!, NameAr:nvarchar(200)!, NameEn:nvarchar(200), Notes:nvarchar(1000), IsActive:bit!=1, LookupType:nvarchar(50)!)
+GeoLocations(CompanyId:bigint!, Code:int!, NameAr:nvarchar(200)!, NameEn:nvarchar(200), Notes:nvarchar(1000), IsActive:bit!=1, Latitude:decimal(9,6)!, Longitude:decimal(9,6)!, RadiusMeters:int!=100, OrgNodeId:bigint)
+Employees(CompanyId:bigint!, EmployeeNo:int!, FingerprintNo:int, Barcode:nvarchar(50), FirstNameAr:nvarchar(100)!, MiddleNameAr:nvarchar(100), LastNameAr:nvarchar(100)!, FullNameAr:nvarchar(300)!, FirstNameEn:nvarchar(100), MiddleNameEn:nvarchar(100), LastNameEn:nvarchar(100), FullNameEn:nvarchar(300), Gender:nvarchar(1)!, NationalityId:bigint, ReligionId:bigint, MaritalStatusId:bigint, BirthDate:date, BirthCountryId:bigint, BirthCityId:bigint, Mobile:nvarchar(30), Email:nvarchar(200), Notes:nvarchar(1000), PhotoAttachmentId:bigint, OrgNodeId:bigint!, JobGradeId:bigint, JobId:bigint, IdentityProfession:nvarchar(200), SponsorId:bigint, EmployeeGroupId:bigint, CostCenterId:bigint, ProjectId:bigint, BankId:bigint, BankAccount:nvarchar(200), HireDate:date!, WorkNatureId:bigint, ContractTypeId:bigint, ContractStart:date, ContractEnd:date, IsOpenContract:bit!=0, StatusId:bigint!, DailyHours:decimal(5,2)!=8, MonthDays:int!=30, HourRate:decimal(18,2)!=0, DayRate:decimal(18,2)!=0, OvertimeEnabled:bit!=0, MobileAttendanceEnabled:bit!=0, WorkStartDate:date, LastWorkStartDate:date, IdentityNo:nvarchar(200), IdentityIssueDate:date, IdentityExpiryDate:date, IdentityCopyNo:nvarchar(20), IdentityOther:nvarchar(200), PassportNo:nvarchar(200), PassportIssuePlace:nvarchar(100), PassportIssueDate:date, PassportExpiryDate:date, BorderNo:nvarchar(50), InsuranceCompanyId:bigint, InsuranceClass:nvarchar(50), InsurancePolicyNo:nvarchar(50), InsuranceDueDate:date, SocialInsuranceNo:nvarchar(50), LaborOfficeNo:nvarchar(50), SocialCompanyPct:decimal(5,2)!=0, SocialEmployeePct:decimal(5,2)!=0)
+EmployeeSalaryItems(CompanyId:bigint!, EmployeeId:bigint!, PayrollItemId:bigint!, Amount:decimal(18,2)!=0, Percentage:decimal(5,2), Notes:nvarchar(500))
+EmployeeDocuments(CompanyId:bigint!, EmployeeId:bigint!, DocumentTypeId:bigint!, DocumentNo:nvarchar(100), IssueDate:date, ExpiryDate:date, AttachmentId:bigint)
+EmployeeArchive(CompanyId:bigint!, EmployeeId:bigint!, Title:nvarchar(200)!, AttachmentId:bigint!)
+EmployeeCompanions(CompanyId:bigint!, EmployeeId:bigint!, RelationId:bigint!, FullName:nvarchar(200)!, ResidenceNo:nvarchar(50), IssueDate:date, ExpiryDate:date)
+EmployeeQualifications(CompanyId:bigint!, EmployeeId:bigint!, QualificationId:bigint, Major:nvarchar(200), IssueDate:date, Notes:nvarchar(500))
+EmployeeExperiences(CompanyId:bigint!, EmployeeId:bigint!, JobTitle:nvarchar(200), YearsOfExperience:decimal(4,1), Details:nvarchar(1000))
+EmployeePortalAccounts(CompanyId:bigint!, EmployeeId:bigint!, UserId:bigint!, IsEnabled:bit!=1, AccessFinancial:bit!=0, AccessAttendance:bit!=1, AccessRequests:bit!=1, AllowMobilePunch:bit!=0)
+EmployeeWorkStarts(CompanyId:bigint!, EmployeeId:bigint!, StartDate:date!, ApprovedBy:bigint, ApprovedAt:datetimeoffset(0), Notes:nvarchar(500))
+Shifts(CompanyId:bigint!, Code:int!, NameAr:nvarchar(200)!, NameEn:nvarchar(200), Notes:nvarchar(1000), IsActive:bit!=1, CycleType:nvarchar(20)!='weekly', StartTime:time(0)!, EndTime:time(0)!, BreakMinutes:int!=0, WorkMinutes:int!, CrossesMidnight:bit!=0, BeforeInMin:int!=0, AfterInMin:int!=0, LateGraceEnabled:bit!=0, LateGraceMin:int!=0, LateAfterGrace:bit!=0, BeforeOutMin:int!=0, AfterOutMin:int!=0, EarlyGraceEnabled:bit!=0, EarlyGraceMin:int!=0, EarlyBeforeGrace:bit!=0, PunchMode:nvarchar(20)!='inout', FlexibleHours:decimal(5,2), RoundWorkTime:bit!=0, PresentIfNoOut:bit!=0, PresentIfNoIn:bit!=0, OvertimeEnabled:bit!=0, OvertimeFrom:time(0), OvertimeTo:time(0))
+ShiftDays(CompanyId:bigint!, ShiftId:bigint!, DayOfWeek:int!, IsWorkDay:bit!=1, StartTime:time(0), EndTime:time(0))
+ShiftRotations(CompanyId:bigint!, Code:int!, NameAr:nvarchar(200)!, NameEn:nvarchar(200), Notes:nvarchar(1000), IsActive:bit!=1, CycleDays:int!)
+ShiftRotationDays(CompanyId:bigint!, RotationId:bigint!, DayIndex:int!, ShiftId:bigint)
+EmployeeShifts(CompanyId:bigint!, EmployeeId:bigint!, ShiftId:bigint!, EffectiveFrom:date!, EffectiveTo:date, RotationId:bigint, RotationStartDate:date)
+BiometricDevices(CompanyId:bigint!, Code:int!, NameAr:nvarchar(200)!, NameEn:nvarchar(200), Notes:nvarchar(1000), IsActive:bit!=1, SerialNumber:nvarchar(100), ConnectionType:nvarchar(10)!='ip', IpAddress:nvarchar(100), DomainName:nvarchar(200), Port:int!=4370, Protocol:nvarchar(30)!='zk', OrgNodeId:bigint, AutoPullMinutes:int!=0, DeviceKeyHash:nvarchar(200), IsOnline:bit!=0, LastSyncAt:datetimeoffset(0), LastPunchTime:datetimeoffset(0))
+PunchLogs(CompanyId:bigint!, DeviceId:bigint, Source:nvarchar(20)!, FingerprintNo:int, EmployeeId:bigint, PunchTime:datetimeoffset(0)!, LocalTime:datetime2(0)!, Direction:nvarchar(10)!='unknown', ClientId:uniqueidentifier, Latitude:decimal(9,6), Longitude:decimal(9,6), AccuracyM:decimal(7,1), IsMock:bit!=0, IsOffline:bit!=0, GeoLocationId:bigint, DistanceM:decimal(9,1), Status:nvarchar(20)!='accepted', ReviewedBy:bigint, ReviewedAt:datetimeoffset(0), Reason:nvarchar(300), RawPayload:nvarchar(max))
+OfficialHolidays(CompanyId:bigint!, Code:int!, NameAr:nvarchar(200)!, NameEn:nvarchar(200), Notes:nvarchar(1000), IsActive:bit!=1, DayOfMonth:int, MonthOfYear:int, CalendarType:nvarchar(10)!='gregorian', DurationDays:int!=1, RepeatsYearly:bit!=1, SpecificStartDate:date, OrgNodeId:bigint)
+ExcuseTypes(CompanyId:bigint!, Code:int!, NameAr:nvarchar(200)!, NameEn:nvarchar(200), Notes:nvarchar(1000), IsActive:bit!=1)
+Excuses(CompanyId:bigint!, DocNo:int!, ExcuseTypeId:bigint!, EmployeeId:bigint!, ExcuseDate:date!, FromTime:time(0), ToTime:time(0), Description:nvarchar(1000), HasAttachment:bit!=0, IsApproved:bit!=1, RequestId:bigint)
+ExcuseShifts(CompanyId:bigint!, ExcuseId:bigint!, ShiftId:bigint!)
+MonthlyAttendances(CompanyId:bigint!, FiscalYearId:bigint!, PeriodYear:int!, PeriodMonth:int!, PeriodFrom:date!, PeriodTo:date!, CalculatedOn:date, Notes:nvarchar(500), IsClosed:bit!=0, ClosedAt:datetimeoffset(0), ClosedBy:bigint)
+MonthlyAttendanceLines(CompanyId:bigint!, MonthlyId:bigint!, EmployeeId:bigint!, RequiredMinutes:int!=0, WorkMinutes:int!=0, LateMin:int!=0, EarlyLeaveMin:int!=0, AbsentMin:int!=0, AbsentDays:decimal(5,2)!=0, ExcusedMin:int!=0, OvertimeMin:int!=0, LeaveDays:decimal(5,2)!=0, Notes:nvarchar(500))
+DailyAttendance(CompanyId:bigint!, EmployeeId:bigint!, WorkDate:date!, ShiftId:bigint, InTime:datetimeoffset(0), OutTime:datetimeoffset(0), RequiredMinutes:int!=0, WorkMinutes:int!=0, LateMin:int!=0, EarlyLeaveMin:int!=0, AbsentMin:int!=0, OvertimeMin:int!=0, ExcusedMin:int!=0, Status:nvarchar(20)!, LeaveId:bigint, ExcuseId:bigint, HolidayId:bigint, IsManualOverride:bit!=0, OverrideReason:nvarchar(300), ComputedAt:datetimeoffset(0), MonthlyId:bigint)
+LeaveTypes(CompanyId:bigint!, Code:int!, NameAr:nvarchar(200)!, NameEn:nvarchar(200), Notes:nvarchar(1000), IsActive:bit!=1, IsPaid:bit!=1, DeductsBalance:bit!=1, RequiresAttachment:bit!=0, MaxDays:int, AllowHalfDay:bit!=0, GenderRestriction:nvarchar(1), CountsHolidays:bit!=0, AnnualEntitlementDays:decimal(5,2), AccrualMode:nvarchar(20)!='monthly', CarryOverMaxDays:decimal(5,2))
+LeavePolicies(CompanyId:bigint!, Code:int!, NameAr:nvarchar(200)!, NameEn:nvarchar(200), Notes:nvarchar(1000), IsActive:bit!=1, LeaveTypeId:bigint!, EmployeeGroupId:bigint, MinServiceMonths:int!=0, DaysPerYear:decimal(5,2)!)
+LeaveBalances(CompanyId:bigint!, EmployeeId:bigint!, LeaveTypeId:bigint!, BalanceYear:int!, OpeningDays:decimal(6,2)!=0, AccruedDays:decimal(6,2)!=0, UsedDays:decimal(6,2)!=0, AdjustedDays:decimal(6,2)!=0, IsApproved:bit!=0)
+LeaveLedger(CompanyId:bigint!, EmployeeId:bigint!, LeaveTypeId:bigint!, EntryDate:date!, EntryType:nvarchar(20)!, Days:decimal(6,2)!, LeaveId:bigint, Notes:nvarchar(500))
+Leaves(CompanyId:bigint!, DocNo:int!, EmployeeId:bigint!, LeaveTypeId:bigint!, FromDate:date!, ToDate:date!, Days:decimal(6,2)!, IsHalfDay:bit!=0, SubstituteEmployeeId:bigint, Reason:nvarchar(1000), AttachmentId:bigint, Status:nvarchar(20)!='draft', ActualReturnDate:date, RequestId:bigint)
+ApprovalFlows(CompanyId:bigint!, Code:int!, NameAr:nvarchar(200)!, NameEn:nvarchar(200), Notes:nvarchar(1000), IsActive:bit!=1, RequestType:nvarchar(30)!, MinAmount:decimal(18,2), MaxAmount:decimal(18,2), MinDays:decimal(6,2))
+ApprovalFlowSteps(CompanyId:bigint!, FlowId:bigint!, StepNo:int!, ApproverKind:nvarchar(20)!, RoleId:bigint, ApproverUserId:bigint, NodeLevelUp:int)
+Requests(CompanyId:bigint!, DocNo:int!, RequestType:nvarchar(30)!, EmployeeId:bigint!, Status:nvarchar(20)!='draft', PayloadJson:nvarchar(max)!, Reason:nvarchar(1000), FlowId:bigint, CurrentStepNo:int, SubmittedAt:datetimeoffset(0), DecidedAt:datetimeoffset(0), ResultEntityType:nvarchar(50), ResultEntityId:bigint, ClientId:uniqueidentifier)
+RequestSteps(CompanyId:bigint!, RequestId:bigint!, StepNo:int!, ApproverUserId:bigint, Decision:nvarchar(20)!='pending', DecidedAt:datetimeoffset(0), Comment:nvarchar(1000), DelegatedFromUserId:bigint)
+RequestComments(CompanyId:bigint!, RequestId:bigint!, UserId:bigint!, CommentText:nvarchar(2000)!)
+Delegations(CompanyId:bigint!, FromUserId:bigint!, ToUserId:bigint!, FromDate:date!, ToDate:date!, IsActive:bit!=1)
+PayrollItems(CompanyId:bigint!, Code:int!, NameAr:nvarchar(200)!, NameEn:nvarchar(200), Notes:nvarchar(1000), IsActive:bit!=1, ItemType:nvarchar(10)!, CalcMethod:nvarchar(20)!='fixed', IsBasic:bit!=0, IsFixed:bit!=1, SubjectToInsurance:bit!=0, SubjectToTax:bit!=0, AccountCode:nvarchar(50), SystemKey:nvarchar(30))
+VariableItems(CompanyId:bigint!, EmployeeId:bigint!, PayrollItemId:bigint!, PeriodYear:int!, PeriodMonth:int!, Amount:decimal(18,2)!=0, Percentage:decimal(5,2), Notes:nvarchar(500), IsApplied:bit!=0, PayrollRunId:bigint)
+Advances(CompanyId:bigint!, DocNo:int!, EmployeeId:bigint!, AdvanceDate:date!, Amount:decimal(18,2)!, InstallmentsCount:int!=1, InstallmentAmount:decimal(18,2)!, FirstDeductYear:int!, FirstDeductMonth:int!, Reason:nvarchar(1000), Status:nvarchar(20)!='active', RemainingAmount:decimal(18,2)!, RequestId:bigint)
+AdvanceInstallments(CompanyId:bigint!, AdvanceId:bigint!, InstallmentNo:int!, PeriodYear:int!, PeriodMonth:int!, Amount:decimal(18,2)!, PaidAmount:decimal(18,2)!=0, Status:nvarchar(20)!='pending', PayrollRunLineId:bigint)
+AdvanceRepayments(CompanyId:bigint!, AdvanceId:bigint!, RepayDate:date!, Amount:decimal(18,2)!, Method:nvarchar(20), Notes:nvarchar(500))
+Custodies(CompanyId:bigint!, DocNo:int!, EmployeeId:bigint!, Description:nvarchar(500)!, SerialNo:nvarchar(100), CustodyValue:decimal(18,2), DeliveredOn:date!, ExpectedReturnOn:date, ReturnedOn:date, ItemCondition:nvarchar(20), DeductedAmount:decimal(18,2), Status:nvarchar(20)!='delivered', AttachmentId:bigint, RequestId:bigint)
+PayrollRuns(CompanyId:bigint!, DocNo:int!, PeriodYear:int!, PeriodMonth:int!, RunType:nvarchar(10)!='standard', ScopeJson:nvarchar(max), IssueDate:date!, Description:nvarchar(500), Status:nvarchar(20)!='draft', ApprovedBy:bigint, ApprovedAt:datetimeoffset(0), PaidAt:datetimeoffset(0))
+PayrollRunLines(CompanyId:bigint!, RunId:bigint!, EmployeeId:bigint!, WorkDays:decimal(6,2)!=0, BasicSalary:decimal(18,2)!=0, TotalEarnings:decimal(18,2)!=0, TotalDeductions:decimal(18,2)!=0, NetPay:decimal(18,2)!=0, Notes:nvarchar(500))
+PayrollRunLineItems(CompanyId:bigint!, LineId:bigint!, PayrollItemId:bigint!, ItemType:nvarchar(10)!, Amount:decimal(18,2)!, Source:nvarchar(20)!, SourceRef:bigint)
+SocialInsuranceRuns(CompanyId:bigint!, PeriodYear:int!, PeriodMonth:int!, IssueDate:date!, Description:nvarchar(500), Status:nvarchar(20)!='draft')
+SocialInsuranceRunLines(CompanyId:bigint!, RunId:bigint!, EmployeeId:bigint!, InsurableWage:decimal(18,2)!, EmployeeShare:decimal(18,2)!, CompanyShare:decimal(18,2)!)
+EndOfServices(CompanyId:bigint!, DocNo:int!, EmployeeId:bigint!, EndDate:date!, Reason:nvarchar(30)!, ServiceYears:decimal(6,2), LeaveCashAmount:decimal(18,2)!=0, GratuityAmount:decimal(18,2)!=0, OtherEarnings:decimal(18,2)!=0, Deductions:decimal(18,2)!=0, NetAmount:decimal(18,2)!=0, Status:nvarchar(20)!='draft', ApprovedBy:bigint, Notes:nvarchar(1000))
+Tasks(CompanyId:bigint!, Title:nvarchar(300)!, Description:nvarchar(max), AssignedUserId:bigint, DueAt:datetimeoffset(0), Recurrence:nvarchar(100), Status:nvarchar(20)!='open', RemindBeforeMin:int)
+
+-- CONSTRAINTS/INDEXES
+ALTER TABLE hr.[Employees] ADD CONSTRAINT CK_Employees_Gender CHECK ([Gender] IN ('M','F'));
+ALTER TABLE hr.[OrgNodes] ADD CONSTRAINT CK_OrgNodes_NodeType CHECK ([NodeType] IN ('root','region','general_admin','company','branch','department','section'));
+ALTER TABLE hr.[Users] ADD CONSTRAINT CK_Users_UserType CHECK ([UserType] IN ('normal','manager'));
+ALTER TABLE hr.[Shifts] ADD CONSTRAINT CK_Shifts_CycleType CHECK ([CycleType] IN ('weekly','rotation'));
+ALTER TABLE hr.[Shifts] ADD CONSTRAINT CK_Shifts_PunchMode CHECK ([PunchMode] IN ('inout','inonly','outonly','any','flexible_hours'));
+ALTER TABLE hr.[BiometricDevices] ADD CONSTRAINT CK_BiometricDevices_ConnectionType CHECK ([ConnectionType] IN ('ip','domain'));
+ALTER TABLE hr.[PunchLogs] ADD CONSTRAINT CK_PunchLogs_Source CHECK ([Source] IN ('device','manual','admin','mobile','import'));
+ALTER TABLE hr.[PunchLogs] ADD CONSTRAINT CK_PunchLogs_Direction CHECK ([Direction] IN ('in','out','unknown'));
+ALTER TABLE hr.[PunchLogs] ADD CONSTRAINT CK_PunchLogs_Status CHECK ([Status] IN ('accepted','pending','rejected','voided'));
+ALTER TABLE hr.[DailyAttendance] ADD CONSTRAINT CK_DailyAttendance_Status CHECK ([Status] IN ('present','absent','leave','holiday','holiday_work','weekend','excused'));
+ALTER TABLE hr.[OfficialHolidays] ADD CONSTRAINT CK_OfficialHolidays_CalendarType CHECK ([CalendarType] IN ('gregorian','hijri'));
+ALTER TABLE hr.[LeaveLedger] ADD CONSTRAINT CK_LeaveLedger_EntryType CHECK ([EntryType] IN ('opening','accrual','usage','adjust','encash','recall','expire'));
+ALTER TABLE hr.[Leaves] ADD CONSTRAINT CK_Leaves_Status CHECK ([Status] IN ('draft','pending','approved','rejected','cancelled'));
+ALTER TABLE hr.[Requests] ADD CONSTRAINT CK_Requests_RequestType CHECK ([RequestType] IN ('leave','advance','custody','excuse','punch_fix','other'));
+ALTER TABLE hr.[Requests] ADD CONSTRAINT CK_Requests_Status CHECK ([Status] IN ('draft','submitted','in_review','approved','rejected','cancelled'));
+ALTER TABLE hr.[RequestSteps] ADD CONSTRAINT CK_RequestSteps_Decision CHECK ([Decision] IN ('pending','approved','rejected','skipped'));
+ALTER TABLE hr.[ApprovalFlowSteps] ADD CONSTRAINT CK_ApprovalFlowSteps_ApproverKind CHECK ([ApproverKind] IN ('direct_manager','node_manager','role','user'));
+ALTER TABLE hr.[PayrollItems] ADD CONSTRAINT CK_PayrollItems_ItemType CHECK ([ItemType] IN ('earning','deduction'));
+ALTER TABLE hr.[PayrollItems] ADD CONSTRAINT CK_PayrollItems_CalcMethod CHECK ([CalcMethod] IN ('fixed','pct_basic','pct_gross'));
+ALTER TABLE hr.[PayrollRunLineItems] ADD CONSTRAINT CK_PayrollRunLineItems_ItemType CHECK ([ItemType] IN ('earning','deduction'));
+ALTER TABLE hr.[PayrollRuns] ADD CONSTRAINT CK_PayrollRuns_Status CHECK ([Status] IN ('draft','review','approved','paid'));
+ALTER TABLE hr.[PayrollRuns] ADD CONSTRAINT CK_PayrollRuns_RunType CHECK ([RunType] IN ('standard','custom'));
+ALTER TABLE hr.[AdvanceInstallments] ADD CONSTRAINT CK_AdvanceInstallments_Status CHECK ([Status] IN ('pending','deducted','settled'));
+ALTER TABLE hr.[Advances] ADD CONSTRAINT CK_Advances_Status CHECK ([Status] IN ('active','settled','cancelled'));
+ALTER TABLE hr.[Custodies] ADD CONSTRAINT CK_Custodies_Status CHECK ([Status] IN ('delivered','returned','lost'));
+ALTER TABLE hr.[Custodies] ADD CONSTRAINT CK_Custodies_ItemCondition CHECK ([ItemCondition] IN ('good','damaged','lost'));
+ALTER TABLE hr.[LeaveTypes] ADD CONSTRAINT CK_LeaveTypes_AccrualMode CHECK ([AccrualMode] IN ('monthly','yearly','none'));
+ALTER TABLE hr.[SocialInsuranceRuns] ADD CONSTRAINT CK_SocialInsuranceRuns_Status CHECK ([Status] IN ('draft','approved'));
+ALTER TABLE hr.[EndOfServices] ADD CONSTRAINT CK_EndOfServices_Status CHECK ([Status] IN ('draft','approved','paid'));
+ALTER TABLE hr.[EndOfServices] ADD CONSTRAINT CK_EndOfServices_Reason CHECK ([Reason] IN ('resignation','termination','contract_end','retirement','death'));
+ALTER TABLE hr.[Tasks] ADD CONSTRAINT CK_Tasks_Status CHECK ([Status] IN ('open','done','cancelled'));
+CREATE UNIQUE INDEX UX_Companies_Code ON hr.[Companies] ([Code]) WHERE [IsDeleted] = 0;
+CREATE UNIQUE INDEX UX_FiscalYears_FiscalYear ON hr.[FiscalYears] ([CompanyId], [FiscalYear]) WHERE [IsDeleted] = 0;
+CREATE UNIQUE INDEX UX_UserGroups_Code ON hr.[UserGroups] ([CompanyId], [Code]) WHERE [IsDeleted] = 0;
+CREATE UNIQUE INDEX UX_Roles_Code ON hr.[Roles] ([CompanyId], [Code]) WHERE [IsDeleted] = 0;
+CREATE UNIQUE INDEX UX_Users_Username ON hr.[Users] ([CompanyId], [Username]) WHERE [IsDeleted] = 0;
+CREATE UNIQUE INDEX UX_Users_EmployeeId ON hr.[Users] ([CompanyId], [EmployeeId]) WHERE [IsDeleted] = 0 AND [EmployeeId] IS NOT NULL;
+CREATE UNIQUE INDEX UX_Permissions_PermCode ON hr.[Permissions] ([PermCode]) WHERE [IsDeleted] = 0;
+CREATE UNIQUE INDEX UX_RolePermissions_RoleId_PermissionId ON hr.[RolePermissions] ([CompanyId], [RoleId], [PermissionId]) WHERE [IsDeleted] = 0;
+CREATE UNIQUE INDEX UX_UserRoles_UserId_RoleId ON hr.[UserRoles] ([CompanyId], [UserId], [RoleId]) WHERE [IsDeleted] = 0;
+CREATE UNIQUE INDEX UX_UserGroupRoles_UserGroupId_RoleId ON hr.[UserGroupRoles] ([CompanyId], [UserGroupId], [RoleId]) WHERE [IsDeleted] = 0;
+CREATE UNIQUE INDEX UX_UserDataScopes_UserId_OrgNodeId ON hr.[UserDataScopes] ([CompanyId], [UserId], [OrgNodeId]) WHERE [IsDeleted] = 0;
+CREATE UNIQUE INDEX UX_UserDevices_UserId_DeviceUid ON hr.[UserDevices] ([CompanyId], [UserId], [DeviceUid]) WHERE [IsDeleted] = 0;
+CREATE UNIQUE INDEX UX_Settings_SettingKey ON hr.[Settings] ([CompanyId], [SettingKey]) WHERE [IsDeleted] = 0;
+CREATE UNIQUE INDEX UX_ReportHeaders_ReportKey ON hr.[ReportHeaders] ([CompanyId], [ReportKey]) WHERE [IsDeleted] = 0;
+CREATE UNIQUE INDEX UX_OrgNodes_Code ON hr.[OrgNodes] ([CompanyId], [Code]) WHERE [IsDeleted] = 0;
+CREATE UNIQUE INDEX UX_JobGrades_Code ON hr.[JobGrades] ([CompanyId], [Code]) WHERE [IsDeleted] = 0;
+CREATE UNIQUE INDEX UX_Jobs_Code ON hr.[Jobs] ([CompanyId], [Code]) WHERE [IsDeleted] = 0;
+CREATE UNIQUE INDEX UX_CostCenters_Code ON hr.[CostCenters] ([CompanyId], [Code]) WHERE [IsDeleted] = 0;
+CREATE UNIQUE INDEX UX_EmployeeGroups_Code ON hr.[EmployeeGroups] ([CompanyId], [Code]) WHERE [IsDeleted] = 0;
+CREATE UNIQUE INDEX UX_Projects_Code ON hr.[Projects] ([CompanyId], [Code]) WHERE [IsDeleted] = 0;
+CREATE UNIQUE INDEX UX_Banks_Code ON hr.[Banks] ([CompanyId], [Code]) WHERE [IsDeleted] = 0;
+CREATE UNIQUE INDEX UX_Countries_Code ON hr.[Countries] ([CompanyId], [Code]) WHERE [IsDeleted] = 0;
+CREATE UNIQUE INDEX UX_Cities_Code ON hr.[Cities] ([CompanyId], [Code]) WHERE [IsDeleted] = 0;
+CREATE UNIQUE INDEX UX_InsuranceCompanies_Code ON hr.[InsuranceCompanies] ([CompanyId], [Code]) WHERE [IsDeleted] = 0;
+CREATE UNIQUE INDEX UX_DocumentTypes_Code ON hr.[DocumentTypes] ([CompanyId], [Code]) WHERE [IsDeleted] = 0;
+CREATE UNIQUE INDEX UX_Sponsors_Code ON hr.[Sponsors] ([CompanyId], [Code]) WHERE [IsDeleted] = 0;
+CREATE UNIQUE INDEX UX_Nationalities_Code ON hr.[Nationalities] ([CompanyId], [Code]) WHERE [IsDeleted] = 0;
+CREATE UNIQUE INDEX UX_WorkNatures_Code ON hr.[WorkNatures] ([CompanyId], [Code]) WHERE [IsDeleted] = 0;
+CREATE UNIQUE INDEX UX_Lookups_LookupType_Code ON hr.[Lookups] ([CompanyId], [LookupType], [Code]) WHERE [IsDeleted] = 0;
+CREATE UNIQUE INDEX UX_GeoLocations_Code ON hr.[GeoLocations] ([CompanyId], [Code]) WHERE [IsDeleted] = 0;
+CREATE UNIQUE INDEX UX_Employees_EmployeeNo ON hr.[Employees] ([CompanyId], [EmployeeNo]) WHERE [IsDeleted] = 0;
+CREATE UNIQUE INDEX UX_Employees_FingerprintNo ON hr.[Employees] ([CompanyId], [FingerprintNo]) WHERE [IsDeleted] = 0 AND [FingerprintNo] IS NOT NULL;
+CREATE UNIQUE INDEX UX_EmployeeSalaryItems_EmployeeId_PayrollItemId ON hr.[EmployeeSalaryItems] ([CompanyId], [EmployeeId], [PayrollItemId]) WHERE [IsDeleted] = 0;
+CREATE UNIQUE INDEX UX_EmployeePortalAccounts_EmployeeId_UserId ON hr.[EmployeePortalAccounts] ([CompanyId], [EmployeeId], [UserId]) WHERE [IsDeleted] = 0;
+CREATE UNIQUE INDEX UX_Shifts_Code ON hr.[Shifts] ([CompanyId], [Code]) WHERE [IsDeleted] = 0;
+CREATE UNIQUE INDEX UX_ShiftDays_ShiftId_DayOfWeek ON hr.[ShiftDays] ([CompanyId], [ShiftId], [DayOfWeek]) WHERE [IsDeleted] = 0;
+CREATE UNIQUE INDEX UX_ShiftRotations_Code ON hr.[ShiftRotations] ([CompanyId], [Code]) WHERE [IsDeleted] = 0;
+CREATE UNIQUE INDEX UX_ShiftRotationDays_RotationId_DayIndex ON hr.[ShiftRotationDays] ([CompanyId], [RotationId], [DayIndex]) WHERE [IsDeleted] = 0;
+CREATE UNIQUE INDEX UX_BiometricDevices_SerialNumber ON hr.[BiometricDevices] ([CompanyId], [SerialNumber]) WHERE [IsDeleted] = 0 AND [SerialNumber] IS NOT NULL;
+CREATE UNIQUE INDEX UX_BiometricDevices_Code ON hr.[BiometricDevices] ([CompanyId], [Code]) WHERE [IsDeleted] = 0;
+CREATE UNIQUE INDEX UX_PunchLogs_ClientId ON hr.[PunchLogs] ([CompanyId], [ClientId]) WHERE [IsDeleted] = 0 AND [ClientId] IS NOT NULL;
+CREATE UNIQUE INDEX UX_PunchLogs_DeviceId_FingerprintNo_PunchTime ON hr.[PunchLogs] ([CompanyId], [DeviceId], [FingerprintNo], [PunchTime]) WHERE [IsDeleted] = 0 AND [DeviceId] IS NOT NULL AND [FingerprintNo] IS NOT NULL;
+CREATE UNIQUE INDEX UX_OfficialHolidays_Code ON hr.[OfficialHolidays] ([CompanyId], [Code]) WHERE [IsDeleted] = 0;
+CREATE UNIQUE INDEX UX_ExcuseTypes_Code ON hr.[ExcuseTypes] ([CompanyId], [Code]) WHERE [IsDeleted] = 0;
+CREATE UNIQUE INDEX UX_Excuses_DocNo ON hr.[Excuses] ([CompanyId], [DocNo]) WHERE [IsDeleted] = 0;
+CREATE UNIQUE INDEX UX_ExcuseShifts_ExcuseId_ShiftId ON hr.[ExcuseShifts] ([CompanyId], [ExcuseId], [ShiftId]) WHERE [IsDeleted] = 0;
+CREATE UNIQUE INDEX UX_MonthlyAttendances_FiscalYearId_PeriodMonth ON hr.[MonthlyAttendances] ([CompanyId], [FiscalYearId], [PeriodMonth]) WHERE [IsDeleted] = 0;
+CREATE UNIQUE INDEX UX_MonthlyAttendanceLines_MonthlyId_EmployeeId ON hr.[MonthlyAttendanceLines] ([CompanyId], [MonthlyId], [EmployeeId]) WHERE [IsDeleted] = 0;
+CREATE UNIQUE INDEX UX_DailyAttendance_EmployeeId_WorkDate_ShiftId ON hr.[DailyAttendance] ([CompanyId], [EmployeeId], [WorkDate], [ShiftId]) WHERE [IsDeleted] = 0;
+CREATE UNIQUE INDEX UX_LeaveTypes_Code ON hr.[LeaveTypes] ([CompanyId], [Code]) WHERE [IsDeleted] = 0;
+CREATE UNIQUE INDEX UX_LeavePolicies_Code ON hr.[LeavePolicies] ([CompanyId], [Code]) WHERE [IsDeleted] = 0;
+CREATE UNIQUE INDEX UX_LeaveBalances_EmployeeId_LeaveTypeId_BalanceYear ON hr.[LeaveBalances] ([CompanyId], [EmployeeId], [LeaveTypeId], [BalanceYear]) WHERE [IsDeleted] = 0;
+CREATE UNIQUE INDEX UX_Leaves_DocNo ON hr.[Leaves] ([CompanyId], [DocNo]) WHERE [IsDeleted] = 0;
+CREATE UNIQUE INDEX UX_ApprovalFlows_Code ON hr.[ApprovalFlows] ([CompanyId], [Code]) WHERE [IsDeleted] = 0;
+CREATE UNIQUE INDEX UX_ApprovalFlowSteps_FlowId_StepNo ON hr.[ApprovalFlowSteps] ([CompanyId], [FlowId], [StepNo]) WHERE [IsDeleted] = 0;
+CREATE UNIQUE INDEX UX_Requests_DocNo ON hr.[Requests] ([CompanyId], [DocNo]) WHERE [IsDeleted] = 0;
+CREATE UNIQUE INDEX UX_RequestSteps_RequestId_StepNo ON hr.[RequestSteps] ([CompanyId], [RequestId], [StepNo]) WHERE [IsDeleted] = 0;
+CREATE UNIQUE INDEX UX_PayrollItems_Code ON hr.[PayrollItems] ([CompanyId], [Code]) WHERE [IsDeleted] = 0;
+CREATE UNIQUE INDEX UX_Advances_DocNo ON hr.[Advances] ([CompanyId], [DocNo]) WHERE [IsDeleted] = 0;
+CREATE UNIQUE INDEX UX_AdvanceInstallments_AdvanceId_InstallmentNo ON hr.[AdvanceInstallments] ([CompanyId], [AdvanceId], [InstallmentNo]) WHERE [IsDeleted] = 0;
+CREATE UNIQUE INDEX UX_Custodies_DocNo ON hr.[Custodies] ([CompanyId], [DocNo]) WHERE [IsDeleted] = 0;
+CREATE UNIQUE INDEX UX_PayrollRuns_DocNo ON hr.[PayrollRuns] ([CompanyId], [DocNo]) WHERE [IsDeleted] = 0;
+CREATE UNIQUE INDEX UX_PayrollRunLines_RunId_EmployeeId ON hr.[PayrollRunLines] ([CompanyId], [RunId], [EmployeeId]) WHERE [IsDeleted] = 0;
+CREATE UNIQUE INDEX UX_SocialInsuranceRuns_PeriodYear_PeriodMonth ON hr.[SocialInsuranceRuns] ([CompanyId], [PeriodYear], [PeriodMonth]) WHERE [IsDeleted] = 0;
+CREATE UNIQUE INDEX UX_SocialInsuranceRunLines_RunId_EmployeeId ON hr.[SocialInsuranceRunLines] ([CompanyId], [RunId], [EmployeeId]) WHERE [IsDeleted] = 0;
+CREATE UNIQUE INDEX UX_EndOfServices_DocNo ON hr.[EndOfServices] ([CompanyId], [DocNo]) WHERE [IsDeleted] = 0;
+CREATE VIEW hr.vw_EmployeeHistory AS
+CREATE VIEW hr.vw_EmployeesWithoutShift AS
+CREATE VIEW hr.vw_ExpiringDocuments AS
+
+-- FOREIGN KEYS (194)
+FiscalYears.CompanyId -> Companies
+UserGroups.CompanyId -> Companies
+Roles.CompanyId -> Companies
+Users.CompanyId -> Companies
+Users.EmployeeId -> Employees
+Users.UserGroupId -> UserGroups
+RolePermissions.CompanyId -> Companies
+RolePermissions.RoleId -> Roles
+RolePermissions.PermissionId -> Permissions
+UserRoles.CompanyId -> Companies
+UserRoles.UserId -> Users
+UserRoles.RoleId -> Roles
+UserGroupRoles.CompanyId -> Companies
+UserGroupRoles.UserGroupId -> UserGroups
+UserGroupRoles.RoleId -> Roles
+UserDataScopes.CompanyId -> Companies
+UserDataScopes.UserId -> Users
+UserDataScopes.OrgNodeId -> OrgNodes
+RefreshTokens.CompanyId -> Companies
+RefreshTokens.UserId -> Users
+UserDevices.CompanyId -> Companies
+UserDevices.UserId -> Users
+Settings.CompanyId -> Companies
+AuditLogs.CompanyId -> Companies
+Notifications.CompanyId -> Companies
+Notifications.UserId -> Users
+Attachments.CompanyId -> Companies
+ReportHeaders.CompanyId -> Companies
+ReportViews.CompanyId -> Companies
+ReportViews.UserId -> Users
+OrgNodes.CompanyId -> Companies
+OrgNodes.ParentId -> OrgNodes
+OrgNodes.ManagerEmployeeId -> Employees
+JobGrades.CompanyId -> Companies
+Jobs.CompanyId -> Companies
+Jobs.JobGradeId -> JobGrades
+CostCenters.CompanyId -> Companies
+EmployeeGroups.CompanyId -> Companies
+Projects.CompanyId -> Companies
+Banks.CompanyId -> Companies
+Countries.CompanyId -> Companies
+Cities.CompanyId -> Companies
+Cities.CountryId -> Countries
+InsuranceCompanies.CompanyId -> Companies
+DocumentTypes.CompanyId -> Companies
+Sponsors.CompanyId -> Companies
+Nationalities.CompanyId -> Companies
+WorkNatures.CompanyId -> Companies
+Lookups.CompanyId -> Companies
+GeoLocations.CompanyId -> Companies
+GeoLocations.OrgNodeId -> OrgNodes
+Employees.CompanyId -> Companies
+Employees.NationalityId -> Nationalities
+Employees.ReligionId -> Lookups
+Employees.MaritalStatusId -> Lookups
+Employees.BirthCountryId -> Countries
+Employees.BirthCityId -> Cities
+Employees.OrgNodeId -> OrgNodes
+Employees.JobGradeId -> JobGrades
+Employees.JobId -> Jobs
+Employees.SponsorId -> Sponsors
+Employees.EmployeeGroupId -> EmployeeGroups
+Employees.CostCenterId -> CostCenters
+Employees.ProjectId -> Projects
+Employees.BankId -> Banks
+Employees.WorkNatureId -> WorkNatures
+Employees.ContractTypeId -> Lookups
+Employees.StatusId -> Lookups
+Employees.InsuranceCompanyId -> InsuranceCompanies
+EmployeeSalaryItems.CompanyId -> Companies
+EmployeeSalaryItems.EmployeeId -> Employees
+EmployeeSalaryItems.PayrollItemId -> PayrollItems
+EmployeeDocuments.CompanyId -> Companies
+EmployeeDocuments.EmployeeId -> Employees
+EmployeeDocuments.DocumentTypeId -> DocumentTypes
+EmployeeArchive.CompanyId -> Companies
+EmployeeArchive.EmployeeId -> Employees
+EmployeeCompanions.CompanyId -> Companies
+EmployeeCompanions.EmployeeId -> Employees
+EmployeeCompanions.RelationId -> Lookups
+EmployeeQualifications.CompanyId -> Companies
+EmployeeQualifications.EmployeeId -> Employees
+EmployeeQualifications.QualificationId -> Lookups
+EmployeeExperiences.CompanyId -> Companies
+EmployeeExperiences.EmployeeId -> Employees
+EmployeePortalAccounts.CompanyId -> Companies
+EmployeePortalAccounts.EmployeeId -> Employees
+EmployeePortalAccounts.UserId -> Users
+EmployeeWorkStarts.CompanyId -> Companies
+EmployeeWorkStarts.EmployeeId -> Employees
+Shifts.CompanyId -> Companies
+ShiftDays.CompanyId -> Companies
+ShiftDays.ShiftId -> Shifts
+ShiftRotations.CompanyId -> Companies
+ShiftRotationDays.CompanyId -> Companies
+ShiftRotationDays.RotationId -> ShiftRotations
+ShiftRotationDays.ShiftId -> Shifts
+EmployeeShifts.CompanyId -> Companies
+EmployeeShifts.EmployeeId -> Employees
+EmployeeShifts.ShiftId -> Shifts
+EmployeeShifts.RotationId -> ShiftRotations
+BiometricDevices.CompanyId -> Companies
+BiometricDevices.OrgNodeId -> OrgNodes
+PunchLogs.CompanyId -> Companies
+PunchLogs.DeviceId -> BiometricDevices
+PunchLogs.EmployeeId -> Employees
+PunchLogs.GeoLocationId -> GeoLocations
+OfficialHolidays.CompanyId -> Companies
+OfficialHolidays.OrgNodeId -> OrgNodes
+ExcuseTypes.CompanyId -> Companies
+Excuses.CompanyId -> Companies
+Excuses.ExcuseTypeId -> ExcuseTypes
+Excuses.EmployeeId -> Employees
+Excuses.RequestId -> Requests
+ExcuseShifts.CompanyId -> Companies
+ExcuseShifts.ExcuseId -> Excuses
+ExcuseShifts.ShiftId -> Shifts
+MonthlyAttendances.CompanyId -> Companies
+MonthlyAttendances.FiscalYearId -> FiscalYears
+MonthlyAttendanceLines.CompanyId -> Companies
+MonthlyAttendanceLines.MonthlyId -> MonthlyAttendances
+MonthlyAttendanceLines.EmployeeId -> Employees
+DailyAttendance.CompanyId -> Companies
+DailyAttendance.EmployeeId -> Employees
+DailyAttendance.ShiftId -> Shifts
+DailyAttendance.LeaveId -> Leaves
+DailyAttendance.ExcuseId -> Excuses
+DailyAttendance.HolidayId -> OfficialHolidays
+DailyAttendance.MonthlyId -> MonthlyAttendances
+LeaveTypes.CompanyId -> Companies
+LeavePolicies.CompanyId -> Companies
+LeavePolicies.LeaveTypeId -> LeaveTypes
+LeavePolicies.EmployeeGroupId -> EmployeeGroups
+LeaveBalances.CompanyId -> Companies
+LeaveBalances.EmployeeId -> Employees
+LeaveBalances.LeaveTypeId -> LeaveTypes
+LeaveLedger.CompanyId -> Companies
+LeaveLedger.EmployeeId -> Employees
+LeaveLedger.LeaveTypeId -> LeaveTypes
+LeaveLedger.LeaveId -> Leaves
+Leaves.CompanyId -> Companies
+Leaves.EmployeeId -> Employees
+Leaves.LeaveTypeId -> LeaveTypes
+Leaves.SubstituteEmployeeId -> Employees
+Leaves.RequestId -> Requests
+ApprovalFlows.CompanyId -> Companies
+ApprovalFlowSteps.CompanyId -> Companies
+ApprovalFlowSteps.FlowId -> ApprovalFlows
+ApprovalFlowSteps.RoleId -> Roles
+ApprovalFlowSteps.ApproverUserId -> Users
+Requests.CompanyId -> Companies
+Requests.EmployeeId -> Employees
+Requests.FlowId -> ApprovalFlows
+RequestSteps.CompanyId -> Companies
+RequestSteps.RequestId -> Requests
+RequestSteps.ApproverUserId -> Users
+RequestSteps.DelegatedFromUserId -> Users
+RequestComments.CompanyId -> Companies
+RequestComments.RequestId -> Requests
+RequestComments.UserId -> Users
+Delegations.CompanyId -> Companies
+Delegations.FromUserId -> Users
+Delegations.ToUserId -> Users
+PayrollItems.CompanyId -> Companies
+VariableItems.CompanyId -> Companies
+VariableItems.EmployeeId -> Employees
+VariableItems.PayrollItemId -> PayrollItems
+VariableItems.PayrollRunId -> PayrollRuns
+Advances.CompanyId -> Companies
+Advances.EmployeeId -> Employees
+Advances.RequestId -> Requests
+AdvanceInstallments.CompanyId -> Companies
+AdvanceInstallments.AdvanceId -> Advances
+AdvanceInstallments.PayrollRunLineId -> PayrollRunLines
+AdvanceRepayments.CompanyId -> Companies
+AdvanceRepayments.AdvanceId -> Advances
+Custodies.CompanyId -> Companies
+Custodies.EmployeeId -> Employees
+Custodies.RequestId -> Requests
+PayrollRuns.CompanyId -> Companies
+PayrollRunLines.CompanyId -> Companies
+PayrollRunLines.RunId -> PayrollRuns
+PayrollRunLines.EmployeeId -> Employees
+PayrollRunLineItems.CompanyId -> Companies
+PayrollRunLineItems.LineId -> PayrollRunLines
+PayrollRunLineItems.PayrollItemId -> PayrollItems
+SocialInsuranceRuns.CompanyId -> Companies
+SocialInsuranceRunLines.CompanyId -> Companies
+SocialInsuranceRunLines.RunId -> SocialInsuranceRuns
+SocialInsuranceRunLines.EmployeeId -> Employees
+EndOfServices.CompanyId -> Companies
+EndOfServices.EmployeeId -> Employees
+Tasks.CompanyId -> Companies
+Tasks.AssignedUserId -> Users

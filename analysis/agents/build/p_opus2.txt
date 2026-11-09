@@ -1,0 +1,40 @@
+البنية الموجودة (لا تعد كتابتها، استخدمها):
+- namespace Hrms.Api.Data: public interface IDbConnectionFactory { System.Data.IDbConnection Create(); } (مسجّلة Singleton، ترجع SqlConnection مغلقة).
+- Dapper 2.1.35 و Microsoft.Data.SqlClient متاحان.
+- Hrms.Api.Security: ICurrentUser { long UserId; long CompanyId; bool IsAdmin; bool Has(string perm); string? Ip; } ، [HasPermission("module.resource.action")] ، TokenService.CreateAccessToken(long userId,long companyId,string username,IEnumerable<string> permissions,bool isAdmin) ، TokenService.CreateRefreshToken() => (string token,string hash) ، static TokenService.HashToken(string) ، static PasswordHasher.Hash/Verify ، IOptions<JwtOptions> (AccessMinutes, RefreshDays).
+- Hrms.Api.Common: record ApiResponse<T>(T Data, PageMeta? Meta=null) ؛ record PageMeta(int Page,int PageSize,int Total). الاستثناءات تتحول لـ RFC7807 تلقائياً: KeyNotFoundException⇒404، ArgumentException⇒400، InvalidOperationException⇒422، UnauthorizedAccessException⇒403.
+- كل الاستعلامات: معاملات Dapper فقط (ممنوع ربط نصوص من المستخدم)، فلتر CompanyId = currentUser.CompanyId و IsDeleted=0 دائماً، الحذف منطقي (IsDeleted=1, UpdatedAt, UpdatedBy).
+- Controllers: [ApiController] [Route("api/v1/...")]، ترجع ApiResponse<T>. أسماء JSON camelCase (افتراضي).
+- اكتب أيضاً AuditLogs عند الإنشاء/التعديل/الحذف: INSERT hr.AuditLogs(CompanyId,UserId,EntityName,EntityId,ActionType,NewValues,IpAddress) بـ ActionType in ('create','update','delete') و NewValues = JSON (System.Text.Json).
+
+المهمة: الدخول والتعريفات والهيكل الإداري. الملفات:
+src/Hrms.Api/Features/Auth/AuthController.cs:
+ POST api/v1/auth/login [AllowAnonymous] body {companyCode:string, username, password, fiscalYear:int?} ⇒ يبحث Companies.Code ثم Users (IsActive=1, IsDeleted=0)؛ قفل الحساب: إن LockedUntil>الآن ⇒ 409 (InvalidOperationException مخصصة ⇒ استخدم Results Problem 409 مباشرة)؛ كلمة خاطئة ⇒ FailedLogins+=1 وعند 5 LockedUntil=الآن+15 دقيقة ثم 401 (return Unauthorized(new ProblemDetails{Title="بيانات الدخول غير صحيحة"}))؛ نجاح ⇒ تصفير FailedLogins و LastLoginAt، تحميل الصلاحيات: DISTINCT p.PermCode من UserRoles ur JOIN RolePermissions rp JOIN Permissions p (مع IsDeleted=0)، إصدار access + refresh (حفظ hash في RefreshTokens مع ExpiresAt و IpAddress). يرجع ApiResponse<LoginData>(accessToken, refreshToken, expiresIn ثواني, user {id, username, displayName, isAdmin, companyId, permissions[]}).
+ POST api/v1/auth/refresh [AllowAnonymous] {refreshToken} ⇒ تدوير: الرمز القديم RevokedAt=الآن و ReplacedByTokenId=الجديد؛ رمز ملغى أو منتهٍ ⇒ 401. استخدم Transaction.
+ POST api/v1/auth/logout [Authorize] {refreshToken} ⇒ إلغاء.
+ GET api/v1/auth/me [Authorize] ⇒ المستخدم وصلاحياته.
+src/Hrms.Api/Features/Definitions/DefinitionsController.cs: CRUD عام بقائمة بيضاء ثابتة (Dictionary) تربط المسار بالجدول والصلاحية:
+ job-grades→JobGrades/defs.job_grades ، jobs→Jobs/defs.jobs ، cost-centers→CostCenters/defs.cost_centers ، employee-groups→EmployeeGroups/defs.employee_groups ، projects→Projects/defs.projects ، banks→Banks/defs.banks ، nationalities→Nationalities/defs.nationalities ، work-natures→WorkNatures/defs.work_natures.
+ الأعمدة المشتركة لها: Code int, NameAr, NameEn, Notes, IsActive. المسارات: GET api/v1/defs/{kind}?search=&page=1&pageSize=50 ، GET {kind}/{id} ، POST {kind} (Code آلي = MAX(Code)+1 إن لم يُرسل؛ تكرار Code ⇒ 409 عبر InvalidOperationException برسالة عربية) ، PUT {kind}/{id} ، DELETE {kind}/{id}. لأن الصلاحية ديناميكية تحقق يدوياً: if(!user.Has(perm+".read")) throw new UnauthorizedAccessException(). kind غير معروف ⇒ KeyNotFoundException.
+ GET api/v1/lookups?lookupType= [Authorize] من hr.Lookups.
+src/Hrms.Api/Features/Org/OrgNodesController.cs: GET api/v1/org-nodes/tree [HasPermission("defs.org_nodes.read")] يرجع شجرة متداخلة (children) مبنية في الذاكرة. POST [defs.org_nodes.create] (منع الدورة: الأب يجب أن ينتمي للشركة؛ NodeType من قيد CK_OrgNodes_NodeType) ، PUT {id} (منع جعل العقدة أباً لنفسها أو لأحد أسلافها ⇒ ArgumentException) ، DELETE {id} (ممنوع إن لها أبناء أو موظفون ⇒ InvalidOperationException "لا يمكن حذف عقدة لها أبناء أو موظفون").
+src/Hrms.Api/Features/Admin/DevBootstrap.cs: public static class DevBootstrap { public static async Task EnsureAdminAsync(IServiceProvider sp, IConfiguration cfg) } — إن لم يوجد أي مستخدم في الشركة ذات Code = cfg["Bootstrap:CompanyCode"] (افتراضي "C1") فأنشئ مستخدم Username=cfg["Bootstrap:AdminUser"]??"admin" بكلمة cfg["Bootstrap:AdminPassword"] (إلزامي؛ إن فارغ لا تفعل شيئاً)، IsAdmin=1، DisplayName="مدير النظام"، واربطه بدور sysadmin (Roles.NameEn='sysadmin').
+مخطط الجداول ذات الصلة (schema hr، كل جدول فيه أيضاً Id bigint IDENTITY, CreatedAt, CreatedBy, UpdatedAt, UpdatedBy, IsDeleted bit, RowVersion rowversion):
+Companies(Code:nvarchar(20)!, NameAr:nvarchar(200)!, NameEn:nvarchar(200), LogoAttachmentId:bigint, TimeZone:nvarchar(50)!='Asia/Riyadh', CurrencyCode:nvarchar(10)!='YER', DefaultLanguage:nvarchar(5)!='ar', HijriAdjustDays:int!=0, IsActive:bit!=1)
+FiscalYears(CompanyId:bigint!, FiscalYear:int!, StartDate:date!, EndDate:date!, IsClosed:bit!=0, IsCurrent:bit!=0)
+Users(CompanyId:bigint!, Username:nvarchar(100)!, PasswordHash:nvarchar(500)!, DisplayName:nvarchar(200)!, Email:nvarchar(200), Mobile:nvarchar(30), Language:nvarchar(5)!='ar', EmployeeId:bigint, UserGroupId:bigint, UserType:nvarchar(20)!='normal', IsAdmin:bit!=0, IsActive:bit!=1, FailedLogins:int!=0, LockedUntil:datetimeoffset(0), LastLoginAt:datetimeoffset(0), MustChangePassword:bit!=0, TwoFactorEnabled:bit!=0, TwoFactorSecret:nvarchar(200))
+Roles(CompanyId:bigint!, Code:int!, NameAr:nvarchar(200)!, NameEn:nvarchar(200), Notes:nvarchar(1000), IsActive:bit!=1, IsSystem:bit!=0)
+Permissions(PermCode:nvarchar(150)!, Module:nvarchar(50)!, DescriptionAr:nvarchar(300), DescriptionEn:nvarchar(300))
+RolePermissions(CompanyId:bigint!, RoleId:bigint!, PermissionId:bigint!)
+UserRoles(CompanyId:bigint!, UserId:bigint!, RoleId:bigint!)
+RefreshTokens(CompanyId:bigint!, UserId:bigint!, TokenHash:nvarchar(200)!, ExpiresAt:datetimeoffset(0)!, RevokedAt:datetimeoffset(0), ReplacedByTokenId:bigint, DeviceUid:nvarchar(100), IpAddress:nvarchar(60))
+OrgNodes(CompanyId:bigint!, Code:int!, NameAr:nvarchar(200)!, NameEn:nvarchar(200), Notes:nvarchar(1000), IsActive:bit!=1, ParentId:bigint, NodeType:nvarchar(20)!, ManagerEmployeeId:bigint, NodePath:nvarchar(500), NodeLevel:int!=0, SortOrder:int!=0)
+JobGrades(CompanyId:bigint!, Code:int!, NameAr:nvarchar(200)!, NameEn:nvarchar(200), Notes:nvarchar(1000), IsActive:bit!=1)
+Jobs(CompanyId:bigint!, Code:int!, NameAr:nvarchar(200)!, NameEn:nvarchar(200), Notes:nvarchar(1000), IsActive:bit!=1, JobGradeId:bigint)
+CostCenters(CompanyId:bigint!, Code:int!, NameAr:nvarchar(200)!, NameEn:nvarchar(200), Notes:nvarchar(1000), IsActive:bit!=1, AccountCode:nvarchar(50))
+EmployeeGroups(CompanyId:bigint!, Code:int!, NameAr:nvarchar(200)!, NameEn:nvarchar(200), Notes:nvarchar(1000), IsActive:bit!=1)
+Projects(CompanyId:bigint!, Code:int!, NameAr:nvarchar(200)!, NameEn:nvarchar(200), Notes:nvarchar(1000), IsActive:bit!=1)
+Banks(CompanyId:bigint!, Code:int!, NameAr:nvarchar(200)!, NameEn:nvarchar(200), Notes:nvarchar(1000), IsActive:bit!=1, SwiftCode:nvarchar(20))
+Nationalities(CompanyId:bigint!, Code:int!, NameAr:nvarchar(200)!, NameEn:nvarchar(200), Notes:nvarchar(1000), IsActive:bit!=1)
+WorkNatures(CompanyId:bigint!, Code:int!, NameAr:nvarchar(200)!, NameEn:nvarchar(200), Notes:nvarchar(1000), IsActive:bit!=1)
+Lookups(CompanyId:bigint!, Code:int!, NameAr:nvarchar(200)!, NameEn:nvarchar(200), Notes:nvarchar(1000), IsActive:bit!=1, LookupType:nvarchar(50)!)

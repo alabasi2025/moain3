@@ -1,0 +1,16 @@
+المهمة: طبقة الأمان والبنية المشتركة لـ ASP.NET Core 8 Web API في مشروع Hrms.Api (namespace Hrms.Api.Security و Hrms.Api.Common).
+الحزم المتاحة فقط: Microsoft.AspNetCore.Authentication.JwtBearer 8.0.x ، System.IdentityModel.Tokens.Jwt (عابرة). لا EF هنا.
+الملفات:
+src/Hrms.Api/Security/PasswordHasher.cs : public static class PasswordHasher { string Hash(string password); bool Verify(string password, string hash); } PBKDF2-SHA256، 100000 تكرار، ملح 16 بايت، الصيغة "PBKDF2$100000$<saltB64>$<hashB64>"، مقارنة ثابتة الزمن.
+src/Hrms.Api/Security/JwtOptions.cs : public sealed class JwtOptions { string Issuer="hrms"; string Audience="hrms"; string Key=""; int AccessMinutes=30; int RefreshDays=14; }
+src/Hrms.Api/Security/TokenService.cs : public sealed class TokenService(IOptions<JwtOptions> o) { public string CreateAccessToken(long userId, long companyId, string username, IEnumerable<string> permissions, bool isAdmin); public (string token, string hash) CreateRefreshToken(); public static string HashToken(string token); } — claims: sub, company_id, name, is_admin, و claim "perm" متكرر لكل صلاحية. HMAC-SHA256.
+src/Hrms.Api/Security/PermissionAuthorization.cs : 
+  public sealed class PermissionRequirement(string permission) : IAuthorizationRequirement { public string Permission {get;} }
+  public sealed class PermissionHandler : AuthorizationHandler<PermissionRequirement> — ينجح إن is_admin="true" أو وُجد claim perm مساوٍ.
+  public sealed class PermissionPolicyProvider : IAuthorizationPolicyProvider — أي policy تبدأ بـ "perm:" تبني سياسة RequireAuthenticatedUser + PermissionRequirement؛ وغير ذلك يفوّض لـ DefaultAuthorizationPolicyProvider.
+  public sealed class HasPermissionAttribute(string permission) : AuthorizeAttribute("perm:"+permission)
+src/Hrms.Api/Security/CurrentUser.cs : public interface ICurrentUser { long UserId; long CompanyId; bool IsAdmin; bool Has(string perm); string? Ip; } + public sealed class CurrentUser(IHttpContextAccessor a) : ICurrentUser.
+src/Hrms.Api/Security/FieldEncryptor.cs : public sealed class FieldEncryptor(string base64Key32) { string? Encrypt(string? plain); string? Decrypt(string? cipher); } AES-256-GCM، الناتج Base64 (nonce12|tag16|cipher)، يرجع null لـ null.
+src/Hrms.Api/Common/ApiResponse.cs : public sealed record ApiResponse<T>(T Data, PageMeta? Meta = null); public sealed record PageMeta(int Page, int PageSize, int Total);
+src/Hrms.Api/Common/ProblemExceptionMiddleware.cs : يحوّل الاستثناءات إلى RFC7807 application/problem+json: KeyNotFoundException⇒404، UnauthorizedAccessException⇒403، ArgumentException⇒400، InvalidOperationException⇒422، DbUpdateConcurrency (تعرّف عليه بالاسم typeof name "DbUpdateConcurrencyException")⇒409، غير ذلك 500 دون كشف التفاصيل. public static class ProblemExceptionMiddlewareExtensions { IApplicationBuilder UseProblemExceptions(this IApplicationBuilder app); }
+src/Hrms.Api/Security/SecurityServiceCollectionExtensions.cs : public static IServiceCollection AddHrmsSecurity(this IServiceCollection s, IConfiguration cfg) يسجل JwtOptions من قسم "Jwt"، TokenService، JwtBearer (ValidateIssuer/Audience/Lifetime/SigningKey، ClockSkew 30s، MapInboundClaims=false)، PermissionPolicyProvider، PermissionHandler، HttpContextAccessor، ICurrentUser، و FieldEncryptor من "Encryption:Key".

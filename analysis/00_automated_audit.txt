@@ -1,0 +1,25 @@
+OpenAPI: VALID
+paths 173 ops 319
+ops without x-permission: 11
+   ('post', '/auth/login', None, 'login')
+   ('post', '/auth/refresh', None, 'refreshToken')
+   ('post', '/auth/logout', None, 'logout')
+   ('post', '/auth/change-password', None, 'changePassword')
+   ('post', '/auth/forgot-password', None, 'forgotPassword')
+   ('get', '/auth/me', None, 'me')
+   ('get', '/auth/fiscal-years', None, 'listOpenFiscalYears')
+   ('get', '/calendar/convert', None, 'convertCalendar')
+   ('post', '/punches/batch', None, 'batchPunches')
+   ('get', '/mobile/config', None, 'mobileConfig')
+   ('post', '/devices/register', None, 'registerDevice')
+seed perms 248
+x-permission not in seed: ['finance.end_of_service.delete', 'finance.payroll_runs.delete', 'finance.social_insurance.delete', 'finance.social_insurance.update']
+seed perms unused by API: 24
+   ['admin.audit_logs.export', 'attendance.daily.export', 'attendance.excuses.approve', 'attendance.monthly.export', 'attendance.punches.export', 'attendance.punches.process', 'employees.employees.export', 'employees.government.read', 'employees.government.update', 'employees.portal_account.read', 'finance.advances.export', 'finance.end_of_service.approve', 'finance.end_of_service.export', 'finance.payroll_runs.export', 'finance.payroll_runs.update', 'finance.payslips.export', 'finance.social_insurance.approve', 'finance.social_insurance.export', 'finance.variable_items.approve', 'leaves.balances.update', 'leaves.leaves.approve', 'leaves.leaves.export', 'me.leaves.create', 'reports.reports.export']
+dup operationIds: []
+tables 81
+FKs 194
+FK to unknown table: []
+Id-columns without FK: 14
+   [('Companies', 'LogoAttachmentId'), ('RefreshTokens', 'ReplacedByTokenId'), ('AuditLogs', 'UserId'), ('AuditLogs', 'EntityId'), ('Attachments', 'OwnerId'), ('ReportHeaders', 'LogoAttachmentId'), ('Employees', 'PhotoAttachmentId'), ('EmployeeDocuments', 'AttachmentId'), ('EmployeeArchive', 'AttachmentId'), ('PunchLogs', 'ClientId'), ('Leaves', 'AttachmentId'), ('Requests', 'ResultEntityId'), ('Requests', 'ClientId'), ('Custodies', 'AttachmentId')]
+tables without CompanyId: ['Companies', 'Permissions']
