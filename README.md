@@ -2,7 +2,7 @@
 
 > 📘 **الكتاب الشامل:** [`docs/BOOK_كتاب_المشروع.md`](docs/BOOK_كتاب_المشروع.md)
 >
-> 🔁 **للمتابعة في بيئة أو وكيل جديد: اقرأ [`HANDOFF.md`](HANDOFF.md) أولاً.** إعادة البيئة: `bash tools/setup_env.sh`. حسابات التجربة: `admin`/`1` و `user`/`1` (الشركة `C1`). المعاينة: https://hrms-moain3.water-juniper-2b8.workers.dev
+> 🔁 **للمتابعة في بيئة أو وكيل جديد: اقرأ [`HANDOFF.md`](HANDOFF.md) أولاً.** إعادة البيئة: `bash tools/setup_env.sh`. حسابات التجربة: `admin`/`1` و `user`/`1` (الشركة `C1`). المعاينة: https://1a16c8af-b624-4e6f-aff8-6a14c2400dfd.vip.gensparksite.com
 
 مستودع تحليل وتجهيز لإعادة بناء «نظام شؤون الموظفين» (أنظمة الجزيرة) على حزمة البناء `hrms_pack`، مع مطابقة قانون العمل اليمني 5/1995.
 
