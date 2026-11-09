@@ -30,6 +30,34 @@ python3 tools/audit.py                        # من داخل pack/
 python3 tools/check_cases.py
 ```
 
+
+## التطبيق (.NET 8) — بُني بالوكلاء الثلاثة عبر مفتاح البروكسي
+| الوحدة | الوكيل | الملفات |
+|---|---|---|
+| محرك الحضور اليومي (دالة نقية) | `claude-opus-5-5` | `src/Hrms.Domain/Attendance/*` |
+| الأمان: JWT، صلاحيات `perm:*`، PBKDF2، AES-256-GCM، RFC7807 | `gpt-6-astra` | `src/Hrms.Api/Security/*`, `Common/*` |
+| محرك الرواتب + قواعد قانون العمل اليمني | `claude-fable-5-1` | `src/Hrms.Domain/Payroll/*`, `Labor/*` |
+| الدخول والتدوير، التعريفات، الهيكل الإداري | `claude-opus-5-5` | `src/Hrms.Api/Features/{Auth,Definitions,Org,Admin}` |
+| ملف الموظف، الفترات، الربط، البصمات، احتساب الحضور | `gpt-6-astra` | `src/Hrms.Api/Features/{Employees,Attendance}` |
+| كشوف الرواتب (احتساب/اعتماد/عكس/صرف) | `claude-opus-5-5` | `src/Hrms.Api/Features/Payroll` |
+| واجهة الويب العربية RTL | `claude-fable-5-1` | `src/Hrms.Api/wwwroot/index.html` |
+
+مخرجات الوكلاء الخام والبرومبتات: `analysis/agents/build/`.
+
+### التشغيل
+```bash
+# 1) قاعدة البيانات (انظر الأعلى): 01 -I ، 02 ، 06 ، ثم usp_SeedCompanyDefaults و usp_ApplyYemenLaborDefaults لشركة Code='C1'
+# 2) الأسرار عبر متغيرات البيئة فقط (لا شيء في المستودع):
+export ConnectionStrings__Hrms='Server=localhost;Database=HRMS;User Id=...;Password=...;TrustServerCertificate=True'
+export Jwt__Key="$(openssl rand -base64 48)"
+export Encryption__Key="$(openssl rand -base64 32)"      # 32 بايت لـ AES-256
+export Bootstrap__AdminPassword='...'                     # ينشئ admin مرة واحدة إن لم يوجد مستخدم
+dotnet run --project src/Hrms.Api --urls http://0.0.0.0:5001
+# 3) الاختبارات
+dotnet test                                               # اختبارات الوحدة
+HRMS_PASSWORD=... python3 tools/e2e_smoke.py              # اختبار طرف-لطرف على القاعدة الحية
+```
+
 ## أهم ما يجب معرفته
 1. «الوثيقة الرئيسية» التي تحيل إليها الحزمة **غير مرفقة** ويجب طلبها.
 2. `01_schema.sql` يفشل جزئياً بصمت بدون `sqlcmd -I`.
